@@ -31,21 +31,22 @@ hansenHurwitz <- function(sampleTotals, selectionProbabilities){
 
 }
 
-#' Inter-unit covariance of Hansen-Hurwitz estimator
+#' Hansen-Hurwitz covariance estimator
 #' @description
-#'  Estimator of the first terms of the covariance of a Hansen-Hurwitz estimate.
+#'  Estimator of the covariance of a Hansen-Hurwitz estimate of a set of population parameters, for single-stage sampling.
+#'
+#'  This also estimates the first terms of the covariance of a multi-stage Hansen-Hurwitz estimate.
 #'  That is the covariance due to variation between sampling units.
 #' @details
-#'  This function estimates the covariance due to sampling variation between sampling untis.
+#'  For multi-stage sampling, this function estimates the covariance due to sampling variation between sampling untis.
 #'  The within-unit variance can be estimated with \code{\link[lotteryEstimator]{HansenHurwitzIntra}}.
-#'  Combine these estimators for hierarchical sampling.
+#'  Combine these estimators for total covariance in hierarchical sampling.
 #'
-#'  For single-stage sampling, the sample totals are known, and there is no within-unit sampling variance.
 #' @param sampleTotals list() of numeric() vectors, each corresponding to a sample of the population parameters to be estimated.
 #' @param selectionProbabilities numeric() vector of selection probabilites for the samples listed in 'sampleTotals'.
-#' @return matrix() representing a symmetric matrix with the estimated inter-unit covariances.
+#' @return matrix() representing a symmetric matrix with the estimated covariances.
 #' @export
-hansenHurwitzInter <- function(sampleTotals, selectionProbabilities){
+hansenHurwitzCovariance <- function(sampleTotals, selectionProbabilities){
 
   if (length(sampleTotals) != length(selectionProbabilities)){
     stop("selectionProbabilities does not correspond to the listed sample totals")
@@ -63,11 +64,11 @@ hansenHurwitzInter <- function(sampleTotals, selectionProbabilities){
   point <- hansenHurwitz(sampleTotals, selectionProbabilities)
   deviations <- lapply(sampleTotals, FUN=function(x){ x - point})
 
-  sumSamples <- (deviations[[1]] %*% t(deviations[[1]])) / selectionProbabilities[1]
+  sumSamples <- outer(deviations[[1]], deviations[[1]]) / selectionProbabilities[1]
 
   if (length(deviations) > 1){
     for (i in 2:length(deviations)){
-      sumSamples <- sumSamples + ( (deviations[[i]] %*% t(deviations[[i]])) / selectionProbabilities[i] )
+      sumSamples <- sumSamples + ( outer(deviations[[i]], deviations[[i]]) / selectionProbabilities[i] )
     }
   }
 
@@ -78,11 +79,11 @@ hansenHurwitzInter <- function(sampleTotals, selectionProbabilities){
 
 #' Intra-unit covariance of Hansen-Hurwitz estimator
 #' @description
-#'  Estimator of the last term of the covariance of a Hansen-Hurwitz estimate.
+#'  Estimator of the last term of the covariance of a Hansen-Hurwitz estimate for a multi-stage design.
 #'  That is the covariance due to variation within sampling units.
 #' @details
 #'  This function estimates the covariance due to sampling variation within sampling untis.
-#'  The between-unit variance can be estimated with \code{\link[lotteryEstimator]{HansenHurwitzInter}}.
+#'  The between-unit variance can be estimated with \code{\link[lotteryEstimator]{hansenHurwitzCovariance}}.
 #'  Combine these estimators for hierarchical sampling.
 #'
 #'  For single-stage sampling, the sample totals are known, and there is no within-unit sampling variance.
@@ -92,7 +93,7 @@ hansenHurwitzInter <- function(sampleTotals, selectionProbabilities){
 #' @return matrix() representing a symmetric matrix with the estimated covariances. intra-unit covariances.
 #' @export
 hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
-  if (length(sampleTotals) != length(selectionProbabilites)){
+  if (length(sampleCovariances) != length(selectionProbabilities)){
     stop("selectionProbabilites does not correspond to the listed sample covariances")
   }
   if (sum(selectionProbabilities) > 1 | sum(selectionProbabilities) <= 0){
@@ -101,6 +102,17 @@ hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
   if (any(selectionProbabilities > 1) | any(selectionProbabilities <= 0)){
     stop("all selectionProbabilities must be in [0,1>")
   }
+
+  sumSamples <- sampleCovariances[[1]] / selectionProbabilities[1]**2
+
+  if (length(sampleCovariances) > 1){
+    for (i in 2:length(sampleCovariances)){
+      sumSamples <- sumSamples + ( sumSamples <- sampleCovariances[[i]] / selectionProbabilities[i]**2)
+    }
+  }
+
+  n <- length(sampleCovariances)
+  return(sumSamples / n**2)
 
 }
 

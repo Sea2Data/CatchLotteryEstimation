@@ -17,12 +17,12 @@ data.table() representing a symmetric matrix with the estimated covariances.
 matrix() representing a symmetric matrix with the estimated covariances. intra-unit covariances.
 }
 \description{
-Estimator of the last term of the covariance of a Hansen-Hurwitz estimate.
+Estimator of the last term of the covariance of a Hansen-Hurwitz estimate for a multi-stage design.
 That is the covariance due to variation within sampling units.
 }
 \details{
 This function estimates the covariance due to sampling variation within sampling untis.
-The between-unit variance can be estimated with \code{\link[lotteryEstimator]{HansenHurwitzInter}}.
+The between-unit variance can be estimated with \code{\link[lotteryEstimator]{hansenHurwitzCovariance}}.
 Combine these estimators for hierarchical sampling.
 
 For single-stage sampling, the sample totals are known, and there is no within-unit sampling variance.
