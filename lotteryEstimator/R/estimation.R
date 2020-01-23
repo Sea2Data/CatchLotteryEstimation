@@ -116,6 +116,37 @@ hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
 
 }
 
+#' Horvitz-Thompson estimator
+#' @description
+#'  Horvitz-Thompson estimator of the population total for a set of population parameters.
+#' @details
+#'  Implement estimation from hierarchical sampling by successive application of this estimator.
+#' @param sampleTotals list() of numeric() vectors, each corresponding to a sample of the population parameters to be estimated.
+#' @param inclusionProbabilities numeric() vector of inclusion probabilites corresponding to the rows in 'sampleTotals'.
+#' @return numeric() vector containing the estimated population totals.
+#' @export
+horvitzThompson <- function(sampleTotals, inclusionProbabilities){
+  if (length(sampleTotals) != length(inclusionProbabilities)){
+    stop("inclusionProbabilities does not correspond to the listed sample totals")
+  }
+  if (sum(inclusionProbabilities) > 1 | sum(inclusionProbabilities) <= 0){
+    stop("sum of inclusionProbabilities must be in [0,1>")
+  }
+  if (any(inclusionProbabilities > 1) | any(inclusionProbabilities <= 0)){
+    stop("all inclusionProbabilities must be in [0,1>")
+  }
+
+  sumSamples <- sampleTotals[[1]] / inclusionProbabilities[1]
+
+  if (length(sampleTotals) > 1){
+    for (i in 2:length(sampleTotals)){
+      sumSamples <- sumSamples + ( sampleTotals[[i]] / inclusionProbabilities[i])
+    }
+  }
+
+  return(sumSamples)
+
+}
 
 
 

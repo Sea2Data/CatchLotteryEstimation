@@ -10,12 +10,20 @@ library(RstoxData)
 #' @param totalLanded total landed weight of species/stock (Kg), used to calculate normalized selection probabilites
 #' @return data.frame() with one row per measured fish
 #' @noRd
-extract_set <- function(datafile="~/bioticsets/v3/biotic_year_2019.xml", species="161722.G03", totalLanded=430506000){
+extract_set <- function(datafile="~/bioticsets/v3/biotic_year_2019.xml", species="161722.G03", totalLanded=430506000, removemissingCatchWeight=T, removeMissingAges=T){
   biotic <- RstoxData::readXmlFile(datafile)
 
   catches <- biotic$catchsample[biotic$catchsample$catchcategory == species & biotic$catchsample$missiontype == 19,]
   individuals <- biotic$individual[biotic$individual$missiontype == 19,]
   ages <- biotic$agedetermination[biotic$agedetermination$missiontype == 19,]
+
+  if (removemissingCatchWeight){
+    catches <- catches[!is.na(catches$catchweight),]
+  }
+
+  if (removeMissingAges){
+    ages <- ages[!is.na(ages$age),]
+  }
 
   if (nrow(catches) != length(unique(catches$serialnumber))){
     stop("Handle fractioned cacthes (delprøve)")

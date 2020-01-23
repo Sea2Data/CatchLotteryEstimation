@@ -3,3 +3,4 @@
 export(hansenHurwitz)
 export(hansenHurwitzCovariance)
 export(hansenHurwitzIntra)
+export(horvitzThompson)

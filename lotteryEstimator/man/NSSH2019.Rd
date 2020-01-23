@@ -7,7 +7,7 @@
 \format{\code{\link[data.table]{data.table}} one row for each measured fish and with columns:
 \describe{
 \item{PSUid}{Identifier for the primary sampling unit (PSU) the fish was sampled from}
-\item{SSUid}{Identifier for the secondary sampling unit (SSU) the fish was sampled from}
+\item{SSUid}{Identifier for the secondary sampling unit (SSU) the fish was sampled from. Identifier is unique across all PSUs}
 \item{PSUselectionProb}{Selection probability for the PSU}
 \item{SSUselectionProb}{Selection probability for the SSU}
 \item{age}{The age determied for the fish}

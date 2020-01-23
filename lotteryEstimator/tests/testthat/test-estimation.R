@@ -69,3 +69,17 @@ expect_equal(dim(covar)[2], 2)
 expect_equal(colnames(covar), parnames)
 expect_equal(rownames(covar), parnames)
 
+
+context("Horvitz-Thompson estimator")
+
+parnames <- c("param1", "param2")
+samples <- list()
+samples$firstsample <- makeNamedVector(c(10,100), parnames)
+samples$secondsample <- makeNamedVector(c(5,400), parnames)
+samples$thirdsample <- makeNamedVector(c(.1,.6), parnames)
+inclusionProbabilities <- c(1/10, 2/10, 1/10)
+
+ht <- horvitzThompson(samples, inclusionProbabilities)
+manual <- makeNamedVector(c(10*10/1 + 5*10/2 + .1*10/1, 100*10/1 + 400*10/2 + .6*10/1), parnames)
+expect_equal(ht[1], manual[1])
+expect_equal(ht[2], manual[2])
