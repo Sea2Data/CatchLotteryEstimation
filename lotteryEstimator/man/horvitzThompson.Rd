@@ -4,14 +4,12 @@
 \alias{horvitzThompson}
 \title{Horvitz-Thompson estimator}
 \usage{
-horvitzThompson(sampleTotals, inclusionProbabilities, tolerance = 1e-09)
+horvitzThompson(sampleTotals, inclusionProbabilities)
 }
 \arguments{
 \item{sampleTotals}{list() of numeric() vectors, each corresponding to a sample of the population parameters to be estimated.}
 
 \item{inclusionProbabilities}{numeric() vector of inclusion probabilites corresponding to the rows in 'sampleTotals'.}
-
-\item{tolerance}{numeric() tolerance for checks on sum of probabilities}
 }
 \value{
 numeric() vector containing the estimated population totals.

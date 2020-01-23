@@ -10,7 +10,7 @@ library(RstoxData)
 #' @param totalLanded total landed weight of species/stock (Kg), used to calculate normalized selection probabilites
 #' @return data.frame() with one row per measured fish
 #' @noRd
-extract_set <- function(datafile="~/bioticsets/v3/biotic_year_2019.xml", species="161722.G03", totalLanded=430506000, removemissingCatchWeight=T, removeMissingAges=T){
+extract_set <- function(datafile="~/bioticsets/v3/biotic_cruiseNumber_19-2019-1_Kommersielle+fartøy_2020-01-22T23.02.15.698Z.xml", species="161722.G03", totalLanded=430506000, removemissingCatchWeight=T, removeMissingAges=T){
   biotic <- RstoxData::readXmlFile(datafile)
 
   catches <- biotic$catchsample[biotic$catchsample$catchcategory == species & biotic$catchsample$missiontype == 19,]

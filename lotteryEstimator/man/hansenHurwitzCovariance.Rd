@@ -22,6 +22,6 @@ That is the covariance due to variation between sampling units.
 }
 \details{
 For multi-stage sampling, this function estimates the covariance due to sampling variation between sampling untis.
-The within-unit variance can be estimated with \code{\link[lotteryEstimator]{HansenHurwitzIntra}}.
+The within-unit variance can be estimated with \code{\link[lotteryEstimator]{hansenHurwitzIntra}}.
 Combine these estimators for total covariance in hierarchical sampling.
 }

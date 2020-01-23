@@ -39,7 +39,7 @@ hansenHurwitz <- function(sampleTotals, selectionProbabilities){
 #'  That is the covariance due to variation between sampling units.
 #' @details
 #'  For multi-stage sampling, this function estimates the covariance due to sampling variation between sampling untis.
-#'  The within-unit variance can be estimated with \code{\link[lotteryEstimator]{HansenHurwitzIntra}}.
+#'  The within-unit variance can be estimated with \code{\link[lotteryEstimator]{hansenHurwitzIntra}}.
 #'  Combine these estimators for total covariance in hierarchical sampling.
 #'
 #' @param sampleTotals list() of numeric() vectors, each corresponding to a sample of the population parameters to be estimated.
@@ -148,5 +148,22 @@ horvitzThompson <- function(sampleTotals, inclusionProbabilities){
 
 }
 
+#
+# Some datatype conventions
+#
 
+#' Catch at age
+#'
+#' Estiamte of catch at age in numbers
+#'
+#' @details
+#'  list with two memebers:
+#'  \describe{
+#'   \item{catchAtAge}{numeric() named vector with catch at age in numbers for each age group}
+#'   \item{covariance}{matrix() with covariance of catch at age between age groups}
+#'  }
+#'
+#' @name catchAtAge
+#'
+NULL
 
