@@ -20,12 +20,24 @@ expect_equal(hh[1], manual[1])
 expect_equal(hh[2], manual[2])
 
 context("Hansen-Hurwitz covariance estimator")
-
 hhCovar <- hansenHurwitzCovariance(samples, selectionProbabilities)
 expect_equal(dim(hhCovar)[1], 2)
 expect_equal(dim(hhCovar)[2], 2)
 expect_equal(colnames(hhCovar), parnames)
 expect_equal(rownames(hhCovar), parnames)
+
+#
+# Test against equal prob example at: https://online.stat.psu.edu/stat506/node/15/
+#
+samples <- list()
+samples[[1]] <- 420
+samples[[2]] <- 1785
+samples[[3]] <- 2198
+selectionProbabilities <- c(650/15650, 2840/15650, 3200/15650)
+hh <- hansenHurwitz(samples, selectionProbabilities)
+expect_lte(abs(hh - 10232.75), 1e-2)
+hhCovar <- hansenHurwitzCovariance(samples, selectionProbabilities)
+expect_lte((hhCovar[1] - 73125.74) / 73125.74, 0.001)
 
 context("Hansen-Hurwitz intra-covariance estimator")
 parnames <- c("param1", "param2")
