@@ -62,13 +62,13 @@ hansenHurwitzCovariance <- function(sampleTotals, selectionProbabilities){
   }
 
   point <- hansenHurwitz(sampleTotals, selectionProbabilities)
-  deviations <- lapply(sampleTotals, FUN=function(x){ x - point})
+  deviations <- lapply(sampleTotals, FUN=function(x){ (x / selectionProbabilities[1]) - point})
 
-  sumSamples <- outer(deviations[[1]], deviations[[1]]) / selectionProbabilities[1]
+  sumSamples <- outer(deviations[[1]], deviations[[1]])
 
   if (length(deviations) > 1){
     for (i in 2:length(deviations)){
-      sumSamples <- sumSamples + ( outer(deviations[[i]], deviations[[i]]) / selectionProbabilities[i] )
+      sumSamples <- sumSamples + outer(deviations[[i]], deviations[[i]])
     }
   }
 

@@ -16,10 +16,11 @@
 #' @export
 simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
 
+
   # get inclusion probabilities for SSUs
-  nSSU <- stats::aggregate(list(nSSU = samples$SSUid), by=list(PSUid=samples$PSUid), function(x){length(unique(x))})
-  samples <- merge(samples, nSSU)
-  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$nSSU
+  NSSU <- stats::aggregate(list(NSSU = samples$SSUid), by=list(PSUid=samples$PSUid), function(x){length(unique(x))})
+  samples <- merge(samples, NSSU)
+  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$NSSU
 
   PSUtotals <- list()
   PSUids <- unique(samples$PSUid)
@@ -31,7 +32,7 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
     SSUids <- unique(samples$SSUid[samples$PSUid == PSU])
     for (j in 1:length(SSUids)){
       SSU <- SSUids[j]
-      SSUtotals[[j]] <- countCategorical(samples$age[samples$SSUid == SSU], 1:20)
+      SSUtotals[[j]] <- countCategorical(samples$age[samples$SSUid == SSU], minAge:maxAge)
       SSUinclusionProbabilities <- c(SSUinclusionProbabilities, samples$SSUinclusionProb[match(SSU, samples$SSUid)])
     }
     PSUtotals[[i]] <- horvitzThompson(SSUtotals, SSUinclusionProbabilities)
