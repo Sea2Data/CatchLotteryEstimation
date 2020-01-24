@@ -36,9 +36,9 @@ extract_set <- function(datafile="~/bioticsets/v3/biotic_cruiseNumber_19-2019-1_
   tab <- merge(catches, tab, by=names(catches)[names(catches) %in% names(tab)])
 
 
-  tab$PSUid <- match(paste(tab$missiontype, tab$startyear, tab$platform, tab$missionnumber, tab$serialnumber), unique(paste(tab$missiontype, tab$startyear, tab$platform, tab$missionnumber, tab$serialnumber)))
-  tab$SSUid <- match(paste(tab$PSUid, tab$catchsampleid), unique(paste(tab$PSUid, tab$catchsampleid)))
-  tab$FishId <- match(paste(tab$SSUid, tab$specimenid), unique(paste(tab$SSUid, tab$specimenid)))
+  tab$PSUid <- as.character(match(paste(tab$missiontype, tab$startyear, tab$platform, tab$missionnumber, tab$serialnumber), unique(paste(tab$missiontype, tab$startyear, tab$platform, tab$missionnumber, tab$serialnumber))))
+  tab$SSUid <- as.character(match(paste(tab$PSUid, tab$catchsampleid), unique(paste(tab$PSUid, tab$catchsampleid))))
+  tab$FishId <- as.character(match(paste(tab$SSUid, tab$specimenid), unique(paste(tab$SSUid, tab$specimenid))))
   tab$MeasurmentId <- match(paste(tab$FishId, tab$agedeterminationid), unique(paste(tab$FishId, tab$agedeterminationid)))
 
   if (length(unique(tab$MeasurmentId)) != length(tab$FishId)){
@@ -60,7 +60,8 @@ extract_set <- function(datafile="~/bioticsets/v3/biotic_cruiseNumber_19-2019-1_
 
   tab$PSUselectionProb <- tab$catchweight / totalLanded
   tab$SSUselectionProb <- tab$lengthsampleweight / tab$catchweight
-  tab <- tab[,c("PSUid", "SSUid", "PSUselectionProb", "SSUselectionProb", "age", "length")]
+  tab$nSSU <- floor(tab$catchweight / tab$lengthsampleweight)
+  tab <- tab[,c("PSUid", "SSUid", "FishId", "PSUselectionProb", "nSSU", "SSUselectionProb", "age", "length")]
 
   return(tab)
 }
