@@ -106,7 +106,7 @@ hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
 
   if (length(sampleCovariances) > 1){
     for (i in 2:length(sampleCovariances)){
-      sumSamples <- sumSamples + ( sumSamples <- sampleCovariances[[i]] / selectionProbabilities[i]**2)
+      sumSamples <- sumSamples + (sampleCovariances[[i]] / selectionProbabilities[i]**2)
     }
   }
 

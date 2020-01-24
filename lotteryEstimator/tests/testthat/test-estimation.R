@@ -39,6 +39,8 @@ expect_lte(abs(hh - 10232.75), 1e-2)
 hhCovar <- hansenHurwitzCovariance(samples, selectionProbabilities)
 expect_lte((hhCovar[1] - 73125.74) / 73125.74, 0.001)
 
+
+
 context("Hansen-Hurwitz intra-covariance estimator")
 parnames <- c("param1", "param2")
 samplesPSU1 <- list()
@@ -64,6 +66,9 @@ expect_equal(dim(covarIntra)[1], 2)
 expect_equal(dim(covarIntra)[2], 2)
 expect_equal(colnames(covarIntra), parnames)
 expect_equal(rownames(covarIntra), parnames)
+
+covarCrib <- ( (covarPSUs$PSU1 / selectionProbabilities[1]**2) + (covarPSUs$PSU2 / selectionProbabilities[2]**2)) / 4
+expect_equal(covarCrib, covarIntra)
 
 
 context("Hansen-Hurwitz 2 stage estimator")
