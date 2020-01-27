@@ -47,7 +47,7 @@ testFrequencyAllEqualWR <- function(size=3, n=3, iter=10, replicates=1000, toler
 # Checks that the frequency of making a sampling a certain element repeatedly is as expected
 # for resampling without replacement
 # This property does not really hold for pseudopopulations when the sample size does not divide the pseudopopulation size
-testFrequencyAllEqualWOR <- function(size=3, n=3, popsize=9, iter=1000, replicates=30, tolerance=0.05){
+testFrequencyAllEqualWOR <- function(size=3, n=3, popsize=9, iter=1000, replicates=100, tolerance=0.05){
 
   NSSH2019$popsize <- popsize
 

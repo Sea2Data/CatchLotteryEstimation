@@ -43,6 +43,7 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
   }
 }
 
+
 #' resample data
 #' @description
 #'  Resamples data from hierarchically clustered data,
@@ -152,13 +153,18 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
 
   #this stage is the ultimate sampling stage
   if (is.null(restStages)){
+
+    indecies <- c()
+    newnames <- c()
     for (i in 1:length(selectedUnits)){
       u <- selectedUnits[i]
-      uSamples <- samples[samples[[currentStage]]==u,]
+      uSamples <- (1:nrow(samples))[samples[[currentStage]]==u]
 
-      uSamples[[currentStage]] <- paste(prefix,currentStage,":",u,"#",i,sep="")
-      result <- rbind(uSamples, result)
+      newnames <- rep(paste(prefix,currentStage,":",u,"#",i,sep=""), length(uSamples))
+      indecies <- c(indecies, uSamples)
     }
+    result <- samples[indecies,]
+    result[[currentStage]] <- newnames
   }
   # resample next stage
   else{
