@@ -128,9 +128,6 @@ horvitzThompson <- function(sampleTotals, inclusionProbabilities){
   if (length(sampleTotals) != length(inclusionProbabilities)){
     stop("inclusionProbabilities does not correspond to the listed sample totals")
   }
-  if (sum(inclusionProbabilities) > 1 | sum(inclusionProbabilities) <= 0){
-    stop("sum of inclusionProbabilities must be in [0,1>")
-  }
   if (any(inclusionProbabilities > 1) | any(inclusionProbabilities <= 0)){
     stop("all inclusionProbabilities must be in [0,1>")
   }
@@ -140,6 +137,83 @@ horvitzThompson <- function(sampleTotals, inclusionProbabilities){
   if (length(sampleTotals) > 1){
     for (i in 2:length(sampleTotals)){
       sumSamples <- sumSamples + ( sampleTotals[[i]] / inclusionProbabilities[i])
+    }
+  }
+
+  return(sumSamples)
+
+}
+
+#' Covariance of Horvitz-Thompson estimator
+#' @description
+#'  Estimator of the covariance of a Horvitz-Thompson estimate for single stage sampling without replacement.
+#'  That is the covariance due to variation between sampling units.
+#' @details
+#'  For multi-stage sampling, this function estimates the covariance due to sampling variation between sampling untis.
+#'  The within-unit variance can be estimated with \code{\link[lotteryEstimator]{horvitzThompsonIntra}}.
+#'  Combine these estimators for total covariance in hierarchical sampling.
+#'
+#' @param sampleTotals list() of numeric() vectors, each corresponding to a sample of the population parameters to be estimated.
+#' @param inclusionProbabilities numeric() vector of inclusion probabilites for the samples whoose covariance are listed in 'sampleCovariances'.
+#' @param coInclusionProbabilities matrix()  of co-inclusion probabilites (joint-inclusionprobabilities) for the samples whoose covariance are listed in 'sampleCovariances'.
+#' @return matrix() representing a symmetric matrix with the estimated covariances.
+horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coInclusionProbabilities){
+  if (length(sampleTotals) != length(inclusionProbabilities)){
+    stop("inclusionProbabilities does not correspond to the listed sample covariances")
+  }
+  if (any(inclusionProbabilities > 1) | any(inclusionProbabilities <= 0)){
+    stop("all inclusionProbabilities must be in [0,1>")
+  }
+  warning("Not tested")
+  sumSamples <- (1-inclusionProbabilities[1]) * outer(sampleTotals[[1]], sampleTotals[[1]]) / inclusionProbabilities[1]**2
+
+  if (length(sampleTotals) > 1){
+    for (i in 2:length(sampleTotals)){
+      sumSamples <- sumSamples + (1-inclusionProbabilities[i]) * outer(sampleTotals[[i]], sampleTotals[[i]]) / inclusionProbabilities[i]**2
+    }
+  }
+
+  for (i in 1:length(sampleTotals)){
+    for (j in i:length(sampleTotals)){
+      if (i != j){
+        sumSamples <- sumSamples + (coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * outer(sampleTotals[[i]], sampleTotals[[j]]) / (coInclusionProbabilities[i,j] *inclusionProbabilities[i] * inclusionProbabilities[j])
+      }
+    }
+  }
+
+  return(sumSamples)
+
+}
+
+#' Intra-unit covariance of Horvitz-Thompson estimator
+#' @description
+#'  Estimator of the last term of the covariance of a Horvitz-Thompson estimate for multi-stage sampling without replacement.
+#'  That is the covariance due to variation within sampling units.
+#' @details
+#'  This function estimates the covariance due to sampling variation within sampling untis.
+#'  The between-unit variance can be estimated with \code{\link[lotteryEstimator]{horvitzThompsonCovariance}}.
+#'  Combine these estimators for hierarchical sampling.
+#'
+#'  For single-stage sampling, the sample totals are known, and there is no within-unit sampling variance.
+#' @param sampleCovariances list() of matrix() matrices, with the covariances of sample estimates.
+#' @param inclusionProbabilities numeric() vector of inclusion probabilites for the samples whoose covariance are listed in 'sampleCovariances'.
+#' @return data.table() representing a symmetric matrix with the estimated covariances.
+#' @return matrix() representing a symmetric matrix with the estimated covariances. intra-unit covariances.
+horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
+  if (length(sampleCovariances) != length(inclusionProbabilities)){
+    stop("inclusionProbabilities does not correspond to the listed sample covariances")
+  }
+  if (any(inclusionProbabilities > 1) | any(inclusionProbabilities <= 0)){
+    stop("all inclusionProbabilities must be in [0,1>")
+  }
+
+  warning("Not tested")
+
+  sumSamples <- sampleCovariances[[1]] / inclusionProbabilities[1]
+
+  if (length(sampleCovariances) > 1){
+    for (i in 2:length(sampleCovariances)){
+      sumSamples <- sumSamples + (sampleCovariances[[i]] / inclusionProbabilities[i])
     }
   }
 
