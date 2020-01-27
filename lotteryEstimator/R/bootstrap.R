@@ -25,19 +25,20 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
     return(sample.int(maxindex, size=n, replace = T))
   }
   else{
+
     # highest integer covered by replicating sample an integral number of times
-    div <- popsize - (popsize %% maxindex)
+    div <- maxindex * (popsize %/% maxindex)
 
     #sample population
     popIndecies <- sample.int(popsize, size=n, replace = F)
 
     #psudopopulation correspondance of fraction below div
     popIndeciesInDiv <- popIndecies[popIndecies<=div]
-    indecies <- (popIndeciesInDiv %% maxindex) + 1
+    indecies <- maxindex - (popIndeciesInDiv %% maxindex)
 
     #randomize psudopopulation correspondance for any selection from fraction above div
-    popIndeciesInRemainder <- popIndecies[popIndecies>div]
-    indecies <- c(indecies, sample.int(maxindex, size=length(popIndeciesInRemainder), replace = F))
+    popIndeciesInRemainder <- sum(popIndecies > div)
+    indecies <- c(indecies, sample.int(maxindex, size=popIndeciesInRemainder, replace = F))
     return(indecies)
   }
 }
