@@ -78,7 +78,7 @@ makeLengthStratifiedSubsample <- function(sample, lengthStrata=defaultLengthStra
   sample$SSUidOriginal <- sample$SSUid
   sample$lengthStrataOriginal <- sample$lengthStrata
 
-  resample <- resample(sample, hierarchy = c("SSUid", "lengthStrata", "FishId"), nSamples = c(NA, NA, "select"), replacement = c(F,F,T), popSize = c(NA, NA, "N"))
+  resample <- resample(sample, hierarchy = c("SSUid", "lengthStrata", "FishId"), nSamples = c(NA, NA, "select"), replacement = c(F,F,F), popSize = c(NA, NA, "N"))
 
   resample$SSUid <- resample$SSUidOriginal
   resample$lengthStrata <- resample$lengthStrataOriginal
