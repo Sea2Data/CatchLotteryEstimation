@@ -9,7 +9,7 @@ probWOreplacement <- function(selectionprob, selections, population){
   else{
     estN <- selectionprob * population
     nextselp <- (estN - 1) / (population - 1)
-    return(selectionprob * probWreplacement(nextselp, selections-1, population-1))
+    return(selectionprob * probWOreplacement(nextselp, selections-1, population-1))
   }
 }
 

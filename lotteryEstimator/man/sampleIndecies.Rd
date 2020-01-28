@@ -14,8 +14,9 @@ sampleIndecies(n, maxindex, replacement = T, popsize = NA)
 \item{replacement}{logical() whether to sample indecies with replacement}
 
 \item{popsize}{integer() size of the pseudopopulation to be sampled. May be NA if replacement is TRUE.}
-
-\item{return}{integer() vector with sampled integers in the range 1:'maxindex'}
+}
+\value{
+integer() vector with sampled integers in the range 1:'maxindex'
 }
 \description{
 samples integers for indexing data tables in resampling.

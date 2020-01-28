@@ -47,12 +47,17 @@ Equal probability selection is assumed for all stages of sampling.
 
  # Mimicking replicate SSU sampling as selection without replacement at SSU level and
  # selection with replacement as if the fish sampled in an SSU is resampled from the enitre haul
- rs <- resample(NSSH2019, c("PSUid", "SSUid","FishId"), replacement = c(F,F,T), nSamples = c(NA,2,NA), popSize = c(NA,"nSSU",NA))
+ rs <- resample(NSSH2019, c("PSUid", "SSUid","FishId"),
+                          replacement = c(FALSE,FALSE,TRUE),
+                          nSamples = c(NA,2,NA),
+                          popSize = c(NA,"nSSU",NA))
 
  # resampling only the SSUs,
  # keeping the PSUs and fish as is, leads to exact replication of samples
  # since there is only one SSU pr PSU in this example
- rs <- resample(NSSH2019, c("PSUid", "SSUid"), replacement = c(F,T), nSamples = c(NA,2))
+ rs <- resample(NSSH2019, c("PSUid", "SSUid"),
+                          replacement = c(FALSE,TRUE),
+                          nSamples = c(NA,2))
  nrow(rs) == 2*nrow(NSSH2019)
  sum(rs$age) == 2*sum(NSSH2019$age)
 
@@ -60,14 +65,17 @@ Equal probability selection is assumed for all stages of sampling.
  # by resampling within SSU.
  # Note that the number of rows are still exactly twice the original samples
  # because the SSUs are resampled within their PSU.
- rs <- resample(NSSH2019, c("PSUid", "SSUid","FishId"), replacement = c(F,T,T), nSamples = c(NA,2,NA))
+ rs <- resample(NSSH2019, c("PSUid", "SSUid","FishId"),
+                          replacement = c(FALSE,FALSE,TRUE),
+                          nSamples = c(NA,2,NA), popSize = c(NA,"nSSU",NA))
  nrow(rs) == 2*nrow(NSSH2019)
  sum(rs$age) != 2*sum(NSSH2019$age)
 
  # resampling without replacement at all levels,
  # and population sizes equal to sample sizes (default)
  # simply reorders the data
- rs <- resample(NSSH2019, c("PSUid", "SSUid", "FishId"), replacement = c(F,F,F))
+ rs <- resample(NSSH2019, c("PSUid", "SSUid", "FishId"),
+                          replacement = c(FALSE,FALSE,FALSE))
  nrow(rs) == nrow(NSSH2019)
  sum(rs$age) == sum(NSSH2019$age)
 
