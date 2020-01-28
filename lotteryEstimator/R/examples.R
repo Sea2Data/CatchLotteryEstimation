@@ -82,7 +82,8 @@ makeLengthStratifiedSubsample <- function(sample, lengthStrata=defaultLengthStra
 
   resample$SSUid <- resample$SSUidOriginal
   resample$lengthStrata <- resample$lengthStrataOriginal
-  resample <- resample[,c(names(resample)[names(resample) %in% namesSample], "lengthStrata", "N")]
+  resample$lengthStrataTotal <- resample$N
+  resample <- resample[,c(names(resample)[names(resample) %in% namesSample], "lengthStrata", "lengthStrataTotal")]
   return(resample)
 
 }
