@@ -23,9 +23,7 @@ The data was not length stratified when colleted, but has been resampled after t
 data(NSSH2019Stratified)
 }
 \description{
-Example data - Norwegian Spring Spawning Herring sampled in 2019
-The example has length stratified age samples taken from each haul-sample.
-The data was not length stratified when colleted, but has been resampled after the fact for purposes of testing and illustration.
+Contains the same columns as \code{\link[lotteryEstimator]{NSSH2019}} in addition to the columns 'lengthStrata' and 'lengthStrataTotal'
 }
 \examples{
 data(NSSH2019Stratified)
