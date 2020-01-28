@@ -19,11 +19,14 @@ NSSH2019$originalFishId <- NSSH2019$FishId
 # for resampling with replacement
 testFrequencyAllEqualWR <- function(size=3, n=3, iter=1000, replicates=100, tolerance=0.05){
 
+  samp <- NSSH2019[1:size,]
+  samp$n <- n
+
   counts <- c()
   for (j in 1:replicates){
     allEq <- 0
     for (i in 1:iter){
-      rs<-resample(NSSH2019[1:size,], c("FishId"), nSamples = c(n), replacement = c(T))
+      rs<-resample(samp, c("FishId"), nSamples = c("n"), replacement = c(T))
       if (length(unique(rs$originalFishId)) == 1){
         allEq <- allEq + 1
       }
@@ -52,13 +55,14 @@ testFrequencyAllEqualWOR <- function(size=3, n=3, popsize=9, iter=1000, replicat
   NSSH2019$popsize <- popsize
 
   samp <- NSSH2019[1:size,]
+  samp$n <- n
   element <- samp$FishId[sample.int(size,1)]
 
   counts <- c()
   for (j in 1:replicates){
     allEq <- 0
     for (i in 1:iter){
-      rs<-resample(samp, c("FishId"), nSamples = c(n), replacement = c(F), popSize = c("popsize"))
+      rs<-resample(samp, c("FishId"), nSamples = c("n"), replacement = c(F), popSize = c("popsize"))
       if (all(rs$originalFishId == element)){
         allEq <- allEq + 1
       }

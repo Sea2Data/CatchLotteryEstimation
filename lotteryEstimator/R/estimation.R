@@ -260,7 +260,7 @@ NULL
 #' @details
 #'  list with three members:
 #'  \describe{
-#'     \item{estimates}{named list of \code{\link[lotterEstimator]{catchAtAge}} estimates, with names identifying strata the estimate was done for.}
+#'     \item{estimates}{named list of \code{\link[lotteryEstimator]{catchAtAge}} estimates, with names identifying strata the estimate was done for.}
 #'  }
 #'
 #'

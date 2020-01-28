@@ -57,7 +57,7 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
 #'  Equal probability selection is assumed for all stages of sampling.
 #' @param samples \code{\link[data.table]{data.table}} with samples
 #' @param hierarchy character() vector describing the sampling units in hierarchical order
-#' @param nSamples integer() vector corresponding to 'hierarchy', specifying how many samples should be included in the resampling at each stage. NAs signify that the number of samples that is available in 'samples' should be included.
+#' @param nSamples character() vector corresponding to 'hierarchy', indicating columns for that specify how many samples should be included in the resampling at the corresponding stage. NAs signify that the number of samples that is available in 'samples' should be included.
 #' @param replacement logical() vector corresponding to 'hierarchy', indicating whether the corresponding sampling units should be resampled with replacement
 #' @param popSize character() vector corresponding to 'hierarchy', indicating columns for population sizes, NAs signify that the number of samples that is available in 'samples' should be considered to be the population.
 #' @param prefix character() a string to prefix used to rename sampling units in resampled data
@@ -66,19 +66,22 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
 #'  # The data set contains SSUs where no replicates where sampled
 #'  data(NSSH2019)
 #'
+#'  # set the number of replicates desired for SSU
+#'  NSSH2019$SSUrepl <- 2
+#'
 #'  # Mimicking replicate SSU sampling as selection without replacement at SSU level and
 #'  # selection with replacement as if the fish sampled in an SSU is resampled from the enitre haul
 #'  rs <- resample(NSSH2019, c("PSUid", "SSUid","FishId"),
 #'                           replacement = c(FALSE,FALSE,TRUE),
-#'                           nSamples = c(NA,2,NA),
+#'                           nSamples = c(NA,"SSUrepl",NA),
 #'                           popSize = c(NA,"nSSU",NA))
 #'
 #'  # resampling only the SSUs,
-#'  # keeping the PSUs and fish as is, leads to exact replication of samples
+#'  # keeping the PSUs and fish as is, leads to exact duplication of samples
 #'  # since there is only one SSU pr PSU in this example
 #'  rs <- resample(NSSH2019, c("PSUid", "SSUid"),
 #'                           replacement = c(FALSE,TRUE),
-#'                           nSamples = c(NA,2))
+#'                           nSamples = c(NA,"SSUrepl"))
 #'  nrow(rs) == 2*nrow(NSSH2019)
 #'  sum(rs$age) == 2*sum(NSSH2019$age)
 #'
@@ -88,7 +91,7 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
 #'  # because the SSUs are resampled within their PSU.
 #'  rs <- resample(NSSH2019, c("PSUid", "SSUid","FishId"),
 #'                           replacement = c(FALSE,FALSE,TRUE),
-#'                           nSamples = c(NA,2,NA), popSize = c(NA,"nSSU",NA))
+#'                           nSamples = c(NA,"SSUrepl",NA), popSize = c(NA,"nSSU",NA))
 #'  nrow(rs) == 2*nrow(NSSH2019)
 #'  sum(rs$age) != 2*sum(NSSH2019$age)
 #'
@@ -154,7 +157,7 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
 
   n <- length(availableUnits)
   if (!is.na(nSamp)){
-    n <- nSamp
+    n <- samples[[nSamp]][[1]]
   }
 
   selectedUnits <- availableUnits[sampleIndecies(n, length(availableUnits), repl, N)]
@@ -168,7 +171,7 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
       u <- selectedUnits[i]
       uSamples <- (1:nrow(samples))[samples[[currentStage]]==u]
 
-      newnames <- rep(paste(prefix,currentStage,":",u,"#",i,sep=""), length(uSamples))
+      newnames <- c(newnames, rep(paste(prefix,currentStage,":",u,"#",i,sep=""), length(uSamples)))
       indecies <- c(indecies, uSamples)
     }
     result <- samples[indecies,]

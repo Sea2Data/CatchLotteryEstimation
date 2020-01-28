@@ -23,5 +23,7 @@ rs<-resample(NSSH2019, c("PSUid", "SSUid"),replacement = c(F,F))
 expect_equal(nrow(rs), nrow(NSSH2019))
 expect_equal(sum(rs$age), sum(NSSH2019$age))
 
-rs<-resample(NSSH2019, c("PSUid", "SSUid", "FishId"),replacement = c(T,T,T), nSamples = c(2,1,2))
+NSSH2019$ssize1 <- 2
+NSSH2019$ssize2 <- 1
+rs<-resample(NSSH2019, c("PSUid", "SSUid", "FishId"),replacement = c(T,T,T), nSamples = c("ssize1","ssize2","ssize1"))
 expect_equal(nrow(rs), 4)

@@ -49,3 +49,40 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
   # standardize age range and estimate
   return(result)
 }
+
+defaultLengthStrata <- as.list(c(0,seq(.25,.39,.02),41))
+names(defaultLengthStrata) <- paste(unlist(defaultLengthStrata), unlist(defaultLengthStrata)[2:length(defaultLengthStrata)], sep="-")
+#' Emulates length stratification by assigning samples to strata and resampling to lower number of fish
+#' @param sample, formatted as \code{\link[lotteryEstimator]{NSSH2019}}
+#' @param lengthStrata, named list mapping strata names to shortest length that should be included in that strata
+#' @param numberPrStrata The number of fish to sample in each strata
+#' @noRd
+makeLengthStratifiedSubsample <- function(sample, lengthStrata=defaultLengthStrata, numberPrStrata=2){
+
+  namesSample <- names(sample)
+
+  stopifnot(all(!is.na(sample$age)))
+  stopifnot(all(!is.na(sample$length)))
+
+  lengthStrata <- lengthStrata[order(unlist(lengthStrata))]
+  sample$lengthStrata <- ""
+  for (i in 1:length(lengthStrata)){
+    sample$lengthStrata[sample$length >= lengthStrata[i]] <- names(lengthStrata)[i]
+  }
+
+  nPrStrata <- stats::aggregate(list(N=sample$length), by=list(lengthStrata=sample$lengthStrata, SSUid=sample$SSUid), FUN=length)
+  nPrStrata$select <- numberPrStrata
+  nPrStrata$select[nPrStrata$N < numberPrStrata] <- nPrStrata$N[nPrStrata$N < numberPrStrata]
+
+  sample <- data.table::merge.data.table(nPrStrata, sample)
+  sample$SSUidOriginal <- sample$SSUid
+  sample$lengthStrataOriginal <- sample$lengthStrata
+
+  resample <- resample(sample, hierarchy = c("SSUid", "lengthStrata", "FishId"), nSamples = c(NA, NA, "select"), replacement = c(F,F,T), popSize = c(NA, NA, "N"))
+
+  resample$SSUid <- resample$SSUidOriginal
+  resample$lengthStrata <- resample$lengthStrataOriginal
+  resample <- resample[,c(names(resample)[names(resample) %in% namesSample], "lengthStrata", "N")]
+  return(resample)
+
+}
