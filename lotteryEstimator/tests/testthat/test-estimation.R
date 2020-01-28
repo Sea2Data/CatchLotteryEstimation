@@ -184,3 +184,12 @@ strata$strata2 <- mockstrata
 result <- estimateFromStrataTotals(strata)
 expect_true(all(result$catchAtAge == 2*mockstrata$catchAtAge))
 expect_true(all(diag(result$covariance) == 2*diag(mockstrata$covariance)))
+
+context("calculateSampleProportionCovariance")
+ages <- c(.1,.2,.5,.2)
+names(ages) <- 1:4
+covariances <- calculateSampleProportionCovariance(ages)
+expect_equal(names(ages), rownames(covariances))
+expect_equal(names(ages), colnames(covariances))
+expect_equal(covariances[1,1], .1 *(1 - .1))
+expect_equal(covariances[3,2], -.5*.2)

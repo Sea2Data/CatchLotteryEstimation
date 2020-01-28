@@ -234,6 +234,14 @@ estimateFromStrataTotals <- function(stratifiedCatchAtAge){
   return(estimate)
 }
 
+#' Covariance of sample proprotions
+#' @param proportions vector of size 'n' containging sampled proportions for a categorical variable with 'n' levels
+#' @return matrix() 'n'x'n' matrix with proportion covariances.
+#' @export
+calculateSampleProportionCovariance <- function(proportions){
+  return(diag(proportions) + outer(-proportions, proportions))
+}
+
 #
 # Some datatype conventions
 #
