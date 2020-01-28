@@ -221,6 +221,19 @@ horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
 
 }
 
+#' Estimate total
+#' @description
+#'  Estimates total catch at age from estiamtes in strata.
+#' @param stratifiedCatchAtAge estimates in each strata, formatted as \code{\link[lotteryEstimator]{stratifiedCatchAtAge}}
+#' @return estimates of total catch at age, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
+#' @export
+estimateFromStrataTotals <- function(stratifiedCatchAtAge){
+  estimate <- list()
+  estimate$catchAtAge <- Reduce('+', lapply(stratifiedCatchAtAge, FUN=function(x){x$catchAtAge}))
+  estimate$covariance <- Reduce('+', lapply(stratifiedCatchAtAge, FUN=function(x){x$covariance}))
+  return(estimate)
+}
+
 #
 # Some datatype conventions
 #
@@ -240,3 +253,17 @@ horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
 #'
 NULL
 
+#' Stratified catch at age
+#'
+#' Stratified Estimate of catch at age in numbers
+#'
+#' @details
+#'  list with three members:
+#'  \describe{
+#'     \item{estimates}{named list of \code{\link[lotterEstimator]{catchAtAge}} estimates, with names identifying strata the estimate was done for.}
+#'  }
+#'
+#'
+#' @name stratifiedCatchAtAge
+#'
+NULL

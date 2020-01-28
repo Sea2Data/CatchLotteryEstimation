@@ -174,3 +174,13 @@ coInclusionProbabilities <- matrix(c(NA,1,
 
 ht <- horvitzThompson(samples, inclusionProbabilities)
 expect_equal(ht, 39)
+
+context("strata totals estimator")
+mockstrata <- simpleNsshEstimator(NSSH2019)
+strata <- list()
+strata$strata1 <- mockstrata
+strata$strata2 <- mockstrata
+
+result <- estimateFromStrataTotals(strata)
+expect_true(all(result$catchAtAge == 2*mockstrata$catchAtAge))
+expect_true(all(diag(result$covariance) == 2*diag(mockstrata$covariance)))
