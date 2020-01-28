@@ -17,7 +17,7 @@ NSSH2019$originalFishId <- NSSH2019$FishId
 
 # Checks that the frequency of making a replicate sample of all equal elements is as expected
 # for resampling with replacement
-testFrequencyAllEqualWR <- function(size=3, n=3, iter=10, replicates=1000, tolerance=0.05){
+testFrequencyAllEqualWR <- function(size=3, n=3, iter=1000, replicates=100, tolerance=0.05){
 
   counts <- c()
   for (j in 1:replicates){
@@ -76,3 +76,6 @@ testFrequencyAllEqualWOR <- function(size=3, n=3, popsize=9, iter=1000, replicat
     write(paste("Expected", expect, "mean result:", meanResult, "(",replicates,"replications). Within RE:", tolerance),stdout())
   }
 }
+
+testFrequencyAllEqualWR()
+testFrequencyAllEqualWOR()
