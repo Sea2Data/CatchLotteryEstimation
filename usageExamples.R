@@ -11,9 +11,9 @@ plotResults <- function(estimates, title=""){
 
 data(NSSH2019)
 estimates <- simpleNsshEstimator(NSSH2019, 1,20)
-
 plotResults(estimates, "NSSH 2019 simple")
 
 estimates2st <- twoStageNsshEstimator(NSSH2019, 1,20)
-
 plotResults(estimates2st, "NSSH 2019 2stage")
+
+hist(diag(estimates$covariance) - diag(estimates2st$covariance))
