@@ -4,7 +4,7 @@
 \alias{catchAtAge}
 \title{Catch at age}
 \description{
-Estiamte of catch at age in numbers
+Estimate of catch at age in numbers
 }
 \details{
 list with two memebers:
