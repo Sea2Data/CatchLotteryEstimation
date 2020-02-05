@@ -19,6 +19,8 @@ bootstrap(
 
 \item{estimator}{function(), must be a simple function of sample, that is take a single argument, formatted as 'sample', and return a numeric vector.}
 
+\item{iterations}{integer() the number of bootstrap iterations to run}
+
 \item{hierarchy}{character() vector describing the sampling units in hierarchical order.}
 
 \item{nSamples}{character() vector corresponding to 'hierarchy', indicating columns for that specify how many samples should be included in the resampling at the corresponding stage. NAs signify that the number of samples that is available in 'samples' should be included.}
@@ -26,8 +28,6 @@ bootstrap(
 \item{replacement}{logical() vector corresponding to 'hierarchy', indicating whether the corresponding sampling units should be resampled with replacement}
 
 \item{popSize}{character() vector corresponding to 'hierarchy', indicating columns for population sizes, NAs signify that the number of samples that is available in 'samples' should be considered to be the population.}
-
-\item{iteration}{integer() the number of bootstrap iterations to run}
 }
 \value{
 list with three members:
@@ -52,5 +52,5 @@ The argument 'popSize' is only of importance for sampling without replacement.
  ssu1sample <- NSSH2019[NSSH2019$SSUid == NSSH2019$SSUid[1],]
  estimator <- function(sample){countCategorical(sample$age, 1:20)}
  bs<-bootstrap(NSSH2019, estimator, 1000,
-               hierarchy = c("FishId"), replacement=c(T))
+               hierarchy = c("FishId"), replacement=c(TRUE))
 }
