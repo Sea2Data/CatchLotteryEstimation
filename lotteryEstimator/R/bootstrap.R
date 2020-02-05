@@ -206,7 +206,7 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
 #'  The argument 'popSize' is only of importance for sampling without replacement.
 #' @param sample sampe \code{\link[data.table]{data.table}} with sample to bootstrap
 #' @param estimator function(), must be a simple function of sample, that is take a single argument, formatted as 'sample', and return a numeric vector.
-#' @param iteration integer() the number of bootstrap iterations to run
+#' @param iterations integer() the number of bootstrap iterations to run
 #' @param hierarchy character() vector describing the sampling units in hierarchical order.
 #' @param nSamples character() vector corresponding to 'hierarchy', indicating columns for that specify how many samples should be included in the resampling at the corresponding stage. NAs signify that the number of samples that is available in 'samples' should be included.
 #' @param replacement logical() vector corresponding to 'hierarchy', indicating whether the corresponding sampling units should be resampled with replacement
@@ -223,7 +223,7 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
 #'  ssu1sample <- NSSH2019[NSSH2019$SSUid == NSSH2019$SSUid[1],]
 #'  estimator <- function(sample){countCategorical(sample$age, 1:20)}
 #'  bs<-bootstrap(NSSH2019, estimator, 1000,
-#'                hierarchy = c("FishId"), replacement=c(T))
+#'                hierarchy = c("FishId"), replacement=c(TRUE))
 #' @export
 bootstrap <- function(sample, estimator, iterations, hierarchy, nSamples=rep(NA, length(hierarchy)), replacement=rep(T, length(hierarchy)), popSize=rep(NA, length(hierarchy))){
 

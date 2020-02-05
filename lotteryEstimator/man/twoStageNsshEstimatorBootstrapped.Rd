@@ -17,6 +17,8 @@ twoStageNsshEstimatorBootstrapped(
 \item{minAge}{lowest age to produce estimate for}
 
 \item{maxAge}{highest age to produce estimate for}
+
+\item{iterations}{number of bootstrap iterations to run for each haul.}
 }
 \value{
 estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}

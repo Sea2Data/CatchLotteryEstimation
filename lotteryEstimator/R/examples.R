@@ -128,6 +128,7 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
 #' @param samples samples formatted as \code{\link[lotteryEstimator]{NSSH2019}}
 #' @param minAge lowest age to produce estimate for
 #' @param maxAge highest age to produce estimate for
+#' @param iterations number of bootstrap iterations to run for each haul.
 #' @return estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
 #' @examples
 #'  data(NSSH2019)
