@@ -16,4 +16,8 @@ plotResults(estimates, "NSSH 2019 simple")
 estimates2st <- twoStageNsshEstimator(NSSH2019, 1,20)
 plotResults(estimates2st, "NSSH 2019 2stage")
 
+estimates2stBoot <- twoStageNsshEstimatorBootstrapped(NSSH2019, 1,20,10)
+plotResults(estimates2stBoot, "NSSH 2019 2stageBs")
+
 hist(diag(estimates$covariance) - diag(estimates2st$covariance))
+hist(diag(estimates$covariance) - diag(estimates2stBoot$covariance))

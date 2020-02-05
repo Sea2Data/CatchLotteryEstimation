@@ -195,4 +195,54 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
   return(result)
 }
 
+#' Bootstrap estimate
+#' @description
+#'  Computes bootstrap estimate of estimate and covariances.
+#'  Bootstrap is based on hierarchical resampling of data.
+#'
+#'  For non-hierarchical sampling, provide a 'hierarchy' as a vector of length one,
+#'  containing a column name that identifies sampled units.
+#'
+#'  The argument 'popSize' is only of importance for sampling without replacement.
+#' @param sample sampe \code{\link[data.table]{data.table}} with sample to bootstrap
+#' @param estimator function(), must be a simple function of sample, that is take a single argument, formatted as 'sample', and return a numeric vector.
+#' @param iteration integer() the number of bootstrap iterations to run
+#' @param hierarchy character() vector describing the sampling units in hierarchical order.
+#' @param nSamples character() vector corresponding to 'hierarchy', indicating columns for that specify how many samples should be included in the resampling at the corresponding stage. NAs signify that the number of samples that is available in 'samples' should be included.
+#' @param replacement logical() vector corresponding to 'hierarchy', indicating whether the corresponding sampling units should be resampled with replacement
+#' @param popSize character() vector corresponding to 'hierarchy', indicating columns for population sizes, NAs signify that the number of samples that is available in 'samples' should be considered to be the population.
+#' @return list with three members:
+#'  \describe{
+#'   \item{iterations}{integer() number of iterations run}
+#'   \item{meanEstimate}{numeric() vector with mean estimate over bootstrap iterations.}
+#'   \item{covariances}{matrix() with covariance of variables in 'meanEstimate' over bootstrap iterations.}
+#'  }
+#' @examples
+#'  #bootstrap fish in haul, leaving haul-selection intact
+#'  data(NSSH2019)
+#'  ssu1sample <- NSSH2019[NSSH2019$SSUid == NSSH2019$SSUid[1],]
+#'  estimator <- function(sample){countCategorical(sample$age, 1:20)}
+#'  bs<-bootstrap(NSSH2019, estimator, 1000,
+#'                hierarchy = c("FishId"), replacement=c(T))
+#' @export
+bootstrap <- function(sample, estimator, iterations, hierarchy, nSamples=rep(NA, length(hierarchy)), replacement=rep(T, length(hierarchy)), popSize=rep(NA, length(hierarchy))){
 
+  estimates <- list()
+  for (i in 1:iterations){
+    bootSample <- resample(sample, hierarchy, nSamples, replacement, popSize)
+    estimates[[i]] <- estimator(bootSample)
+  }
+
+  meanEst <- Reduce("+", estimates) / length(estimates)
+  estDiff <- lapply(estimates, function(x){x - meanEst})
+  estDiffOp <- lapply(estDiff, function(x){outer(x,x)})
+  covariances <- Reduce("+", estDiffOp) / (length(estimates) - 1)
+
+  results <- list()
+  results$iterations <- iterations
+  results$meanEstimate <- meanEst
+  results$covariances <- covariances
+
+  return(results)
+
+}

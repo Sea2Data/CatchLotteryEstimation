@@ -92,7 +92,7 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
 #' @return estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
 #' @examples
 #'  data(NSSH2019)
-#'  estimates <- simpleNsshEstimator(NSSH2019, 1,20)
+#'  estimates <- twoStageNsshEstimator(NSSH2019, 1,20)
 #' @export
 twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
 
@@ -118,6 +118,46 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
   result$covariance <- covariance
   return(result)
 }
+
+#' Estimator for NSSH
+#' @description
+#'  Estimator for 2-stage lottery sampling, assuming with replacement haul-selection and estimating intra-haul variance from sample covariances.
+#' @details
+#'  As \code{\link[lotteryEstimator]{twoStageNsshEstimator}}, but with intra-haul variance bootstrapped
+#'  by selection without replacement.
+#' @param samples samples formatted as \code{\link[lotteryEstimator]{NSSH2019}}
+#' @param minAge lowest age to produce estimate for
+#' @param maxAge highest age to produce estimate for
+#' @return estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
+#' @examples
+#'  data(NSSH2019)
+#'  estimates <- twoStageNsshEstimatorBootstrapped(NSSH2019, 1,20)
+#' @export
+twoStageNsshEstimatorBootstrapped <- function(samples, minAge=1, maxAge=20, iterations=10){
+
+  # get number of fish in each SSU
+  nFish <- stats::aggregate(list(nFishSSU=samples$age), by = list(SSUid=samples$SSUid), FUN=length)
+  samples <- merge(samples, nFish, all.x=T)
+  samples$nFishHaul <- samples$nFishSSU * samples$nSSU
+
+  # estimate for each haul
+  numAtAgeHaul <- function(sample){proportionCategorical(sample$age, minAge:maxAge) * sample$nFishHaul[1]}
+
+  # Hansen Hurwitz for total (estimating from PSUS)
+  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+
+  # bootstrapped WOR covariance for for each haul
+  intraHaulCovariance <- function(sample){bootstrap(sample, numAtAgeHaul, iterations, c("FishId"), replacement = c(F), popSize = c("nFishHaul"))$covariances}
+
+  # Hansen Hurwitz for covariance for total
+  covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, intraHaulCovariance, "PSUselectionProb")
+
+  result <- list()
+  result$catchAtAge <- numAtAgeTotal
+  result$covariance <- covariance
+  return(result)
+}
+
 
 
 defaultLengthStrata <- as.list(c(0,seq(.25,.39,.02),41))
