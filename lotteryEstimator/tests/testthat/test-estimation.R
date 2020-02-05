@@ -149,7 +149,7 @@ context("hierarchicalHansenHurwitz and hierarchicalHorwitzThompson")
 numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
 numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
 exampleSamples <- lotteryEstimator::NSSH2019
-exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb #only one SSU sampled pr PSU in example
 numAtAgeTotal <- hierarchicalHansenHurwitz(exampleSamples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 numAtAgeSimpleNSSH <- simpleNsshEstimatorReference(exampleSamples, minAge = 2, maxAge = 20)$catchAtAge
 expect_equivalent(numAtAgeTotal, numAtAgeSimpleNSSH)

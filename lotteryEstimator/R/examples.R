@@ -3,8 +3,11 @@
 #' @noRd
 simpleNsshEstimatorReference <- function(samples, minAge=1, maxAge=20){
 
-  # get inclusion probabilities for SSUs
-  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$nSSU
+  sampledSSUs <- stats::aggregate(list(sampledSSUs=samples$SSUid), by=list(PSUid=samples$PSUid), FUN=function(x){length(unique(x))})
+  samples <- merge(samples, sampledSSUs)
+
+  # calculate inclusion probability for SSUs
+  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$sampledSSUs
 
   PSUtotals <- list()
   PSUids <- unique(samples$PSUid)
@@ -51,9 +54,11 @@ simpleNsshEstimatorReference <- function(samples, minAge=1, maxAge=20){
 #' @export
 simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
 
+  sampledSSUs <- stats::aggregate(list(sampledSSUs=samples$SSUid), by=list(PSUid=samples$PSUid), FUN=function(x){length(unique(x))})
+  samples <- merge(samples, sampledSSUs)
+
   # calculate inclusion probability for SSUs
-  exampleSamples <- lotteryEstimator::NSSH2019
-  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$sampledSSUs
 
 
   # cencus in each bucket
@@ -63,10 +68,10 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
   numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
 
   # Hansen Hurwitz for total (estimating from PSUS)
-  numAtAgeTotal <- hierarchicalHansenHurwitz(exampleSamples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 
   # Hansen Hurwitz for covairance, assuming 0 intra-haul covariance
-  covariance <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
+  covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
 
   result <- list()
   result$catchAtAge <- numAtAgeTotal
@@ -92,38 +97,26 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
 #' @export
 twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
 
-  # get inclusion probabilities for SSUs
-  NSSU <- stats::aggregate(list(NSSU = samples$SSUid), by=list(PSUid=samples$PSUid), function(x){length(unique(x))})
-  samples <- merge(samples, NSSU)
-  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$NSSU
+  # get number of fish in each SSU
+  nFish <- stats::aggregate(list(nFishSSU=samples$age), by = list(SSUid=samples$SSUid), FUN=length)
+  samples <- merge(samples, nFish, all.x=T)
+  samples$nFishHaul <- samples$nFishSSU * samples$nSSU
 
-  PSUtotals <- list()
-  PSUids <- unique(samples$PSUid)
-  PSUselectionProbabilities <- c()
-  for (i in 1:length(PSUids)){
-    PSU <- PSUids[i]
-    SSUtotals <- list()
-    SSUinclusionProbabilities <- c()
-    SSUids <- unique(samples$SSUid[samples$PSUid == PSU])
-    for (j in 1:length(SSUids)){
-      SSU <- SSUids[j]
-      SSUtotals[[j]] <- countCategorical(samples$age[samples$SSUid == SSU], minAge:maxAge)
-      SSUtotals[[j]] <- SSUtotals[[j]] / sum(SSUtotals[[j]]) # get proportions
-      stop("Not implemented")
-      SSUinclusionProbabilities <- c(SSUinclusionProbabilities, samples$SSUinclusionProb[match(SSU, samples$SSUid)])
-    }
-    PSUtotals[[i]] <- horvitzThompson(SSUtotals, SSUinclusionProbabilities)
-    PSUselectionProbabilities <- c(PSUselectionProbabilities, samples$PSUselectionProb[match(PSU, samples$PSUid)])
-  }
+  # estimate for each haul
+  numAtAgeHaul <- function(sample){proportionCategorical(sample$age, minAge:maxAge) * sample$nFishHaul[1]}
 
-  total <- hansenHurwitz(PSUtotals, PSUselectionProbabilities)
-  variance <- hansenHurwitzCovariance(PSUtotals, PSUselectionProbabilities)
+  # Hansen Hurwitz for total (estimating from PSUS)
+  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+
+  # sample covariance for for each haul
+  intraHaulCovariance <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, minAge:maxAge)) * sample$nFishHaul[1]**2}
+
+  # Hansen Hurwitz for covairance, assuming 0 intra-haul covariance
+  covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, intraHaulCovariance, "PSUselectionProb")
 
   result <- list()
-  result$catchAtAge <- total
-  result$covariance <- variance
-
-  # standardize age range and estimate
+  result$catchAtAge <- numAtAgeTotal
+  result$covariance <- covariance
   return(result)
 }
 
