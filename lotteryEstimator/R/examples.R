@@ -109,7 +109,7 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
   numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 
   # sample covariance for for each haul
-  intraHaulCovariance <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, minAge:maxAge)) * sample$nFishHaul[1]**2}
+  intraHaulCovariance <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, minAge:maxAge)) * (sample$nFishHaul[1]**2 / ((sample$nFishSSU[1])*(sample$nFishSSU[1]-1)))}
 
   # Hansen Hurwitz for covairance, assuming 0 intra-haul covariance
   covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, intraHaulCovariance, "PSUselectionProb")
@@ -119,6 +119,7 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
   result$covariance <- covariance
   return(result)
 }
+
 
 defaultLengthStrata <- as.list(c(0,seq(.25,.39,.02),41))
 names(defaultLengthStrata) <- paste(unlist(defaultLengthStrata), unlist(defaultLengthStrata)[2:length(defaultLengthStrata)], sep="-")
