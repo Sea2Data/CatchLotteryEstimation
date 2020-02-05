@@ -162,7 +162,9 @@ hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
 #'                                   numAtAgeSample, "SSUinclusionProb")}
 #'  exampleSamples <- lotteryEstimator::NSSH2019
 #'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
-#'  covariance <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
+#'  covariance <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid",
+#'                                                    numAtAgeHaul, function(x){0},
+#'                                                    "PSUselectionProb")
 #' @export
 hierarchicalHansenHurwitzCovariance <- function(sample, sampleId, subEstimator, subCovarianceEstimator, selectionProbabilities){
   sampleTotals <- list()

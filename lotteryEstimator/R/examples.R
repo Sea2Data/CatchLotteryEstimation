@@ -60,7 +60,6 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
   # calculate inclusion probability for SSUs
   samples$SSUinclusionProb <- samples$SSUselectionProb * samples$sampledSSUs
 
-
   # cencus in each bucket
   numAtAgeSample <- function(sample){countCategorical(sample$age, minAge:maxAge)}
 
@@ -111,7 +110,7 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
   # sample covariance for for each haul
   intraHaulCovariance <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, minAge:maxAge)) * (sample$nFishHaul[1]**2 / ((sample$nFishSSU[1])*(sample$nFishSSU[1]-1)))}
 
-  # Hansen Hurwitz for covairance, assuming 0 intra-haul covariance
+  # Hansen Hurwitz for covariance for total
   covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, intraHaulCovariance, "PSUselectionProb")
 
   result <- list()
