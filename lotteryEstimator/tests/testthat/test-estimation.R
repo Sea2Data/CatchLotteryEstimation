@@ -145,6 +145,20 @@ expect_lte((covarInter[1] - 233.28*233.28) / covarInter[1], 0.0001) #checked aga
 
 covar <- covarInter + covarIntra
 
+context("hierarchicalHansenHurwitz and hierarchicalHorwitzThompson")
+numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
+exampleSamples <- lotteryEstimator::NSSH2019
+exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+numAtAgeTotal <- hierarchicalHansenHurwitz(exampleSamples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+numAtAgeSimpleNSSH <- simpleNsshEstimatorReference(exampleSamples, minAge = 2, maxAge = 20)$catchAtAge
+expect_equivalent(numAtAgeTotal, numAtAgeSimpleNSSH)
+
+context("hierarchicalHansenHurwitzCovariance")
+covarianceTotal <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
+covarianceSimpleNSSH <- simpleNsshEstimatorReference(exampleSamples, minAge = 2, maxAge = 20)$covariance
+expect_equivalent(covarianceTotal, covarianceSimpleNSSH)
+
 
 context("Horvitz-Thompson estimator")
 
@@ -176,7 +190,7 @@ ht <- horvitzThompson(samples, inclusionProbabilities)
 expect_equal(ht, 39)
 
 context("strata totals estimator")
-mockstrata <- simpleNsshEstimator(NSSH2019)
+mockstrata <- simpleNsshEstimatorReference(NSSH2019)
 strata <- list()
 strata$strata1 <- mockstrata
 strata$strata2 <- mockstrata
@@ -184,12 +198,3 @@ strata$strata2 <- mockstrata
 result <- estimateFromStrataTotals(strata)
 expect_true(all(result$catchAtAge == 2*mockstrata$catchAtAge))
 expect_true(all(diag(result$covariance) == 2*diag(mockstrata$covariance)))
-
-context("calculateSampleProportionCovariance")
-ages <- c(.1,.2,.5,.2)
-names(ages) <- 1:4
-covariances <- calculateSampleProportionCovariance(ages)
-expect_equal(names(ages), rownames(covariances))
-expect_equal(names(ages), colnames(covariances))
-expect_equal(covariances[1,1], .1 *(1 - .1))
-expect_equal(covariances[3,2], -.5*.2)

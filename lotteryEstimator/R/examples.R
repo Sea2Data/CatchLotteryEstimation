@@ -1,26 +1,10 @@
 
-#' Simple estimator for NSSH
-#' @description
-#'  Estimator for 2-stage lottery sampling, assuming with replacement haul-selection and ignoring intra-haul variance.
-#' @details
-#'  This estimator is applicable for two stage sampling based on the lottery system.
-#'  PSU: haul, assumed UEPWR, Hansen-Hurwitz estimator
-#'  SSU: bucket, assumed SRSWOR, Horvitz-Thompson estimator
-#' @param samples samples formatted as \code{\link[lotteryEstimator]{NSSH2019}}
-#' @param minAge lowest age to produce estimate for
-#' @param maxAge highest age to produce estimate for
-#' @return estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
-#' @examples
-#'  data(NSSH2019)
-#'  estimates <- simpleNsshEstimator(NSSH2019, 1,20)
-#' @export
-simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
-
+#' Reference implementation. Kept for testing purposes
+#' @noRd
+simpleNsshEstimatorReference <- function(samples, minAge=1, maxAge=20){
 
   # get inclusion probabilities for SSUs
-  NSSU <- stats::aggregate(list(NSSU = samples$SSUid), by=list(PSUid=samples$PSUid), function(x){length(unique(x))})
-  samples <- merge(samples, NSSU)
-  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$NSSU
+  samples$SSUinclusionProb <- samples$SSUselectionProb * samples$nSSU
 
   PSUtotals <- list()
   PSUids <- unique(samples$PSUid)
@@ -47,6 +31,47 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
   result$covariance <- variance
 
   # standardize age range and estimate
+  return(result)
+}
+
+#' Simple estimator for NSSH
+#' @description
+#'  Estimator for 2-stage lottery sampling, assuming with replacement haul-selection and ignoring intra-haul variance.
+#' @details
+#'  This estimator is applicable for two stage sampling based on the lottery system.
+#'  PSU: haul, assumed UEPWR, Hansen-Hurwitz estimator
+#'  SSU: bucket, assumed SRSWOR, Horvitz-Thompson estimator
+#' @param samples samples formatted as \code{\link[lotteryEstimator]{NSSH2019}}
+#' @param minAge lowest age to produce estimate for
+#' @param maxAge highest age to produce estimate for
+#' @return estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
+#' @examples
+#'  data(NSSH2019)
+#'  estimates <- simpleNsshEstimator(NSSH2019, 1,20)
+#' @export
+simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
+
+  # calculate inclusion probability for SSUs
+  exampleSamples <- lotteryEstimator::NSSH2019
+  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+
+
+  # cencus in each bucket
+  numAtAgeSample <- function(sample){countCategorical(sample$age, minAge:maxAge)}
+
+  # Horwitz Thompson for haul (estimating from SSUs)
+  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
+
+  # Hansen Hurwitz for total (estimating from PSUS)
+  numAtAgeTotal <- hierarchicalHansenHurwitz(exampleSamples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+
+  # Hansen Hurwitz for covairance, assuming 0 intra-haul covariance
+  covariance <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
+
+  result <- list()
+  result$catchAtAge <- numAtAgeTotal
+  result$covariance <- covariance
+
   return(result)
 }
 

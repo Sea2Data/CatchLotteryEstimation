@@ -31,6 +31,37 @@ hansenHurwitz <- function(sampleTotals, selectionProbabilities){
 
 }
 
+#' Hierarchical Hansen-Hurwitz
+#' @description
+#'  \code{\link[lotteryEstimator]{HierarchicalEstimator}} for applying
+#'  \code{\link[lotteryEstimator]{hansenHurwitz}} in hierarchical implementations.
+#' @param sample \code{\link[data.table]{data.table}} with sample data
+#' @param sampleId character() identifying the columns in 'sample' that identify the sampling units to estimate from
+#' @param subEstimator function, function for estimating totals for each sample
+#' @param selectionProbabilities character() indentifying the columns in 'sample' with selection probabilites for the sampling units.
+#' @return numeric() estimate of total
+#' @examples
+#'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
+#'                                   numAtAgeSample, "SSUinclusionProb")}
+#'  exampleSamples <- lotteryEstimator::NSSH2019
+#'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+#'  numAtAgeTotal <- hierarchicalHansenHurwitz(exampleSamples, "PSUid",
+#'                                             numAtAgeHaul, "PSUselectionProb")
+#' @export
+hierarchicalHansenHurwitz <- function(sample, sampleId, subEstimator, selectionProbabilities){
+
+  sampleTotals <- list()
+  sProb <- list()
+  for (id in unique(sample[[sampleId]])){
+    sampleUnitData <- sample[sample[[sampleId]] == id,]
+    sProb[[id]] <- sampleUnitData[[selectionProbabilities]][1]
+    sampleTotals[[id]] <- subEstimator(sampleUnitData)
+  }
+  return(hansenHurwitz(sampleTotals, unlist(sProb)))
+
+}
+
 #' Hansen-Hurwitz covariance estimator
 #' @description
 #'  Estimator of the covariance of a Hansen-Hurwitz estimate of a set of population parameters, for single-stage sampling.
@@ -115,6 +146,42 @@ hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
 
 }
 
+#' Hierarchical Hansen-Hurwitz covariance
+#' @description
+#'  \code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating
+#'  covariance of \code{\link[lotteryEstimator]{hansenHurwitz}} in hierarchical implementations.
+#' @param sample \code{\link[data.table]{data.table}} with sample data
+#' @param sampleId character() identifying the columns in 'sample' that identify the sampling units to estimate from
+#' @param subEstimator function, function for estimating totals for each sample
+#' @param subCovarianceEstimator function, function for estimating covariances for each sample
+#' @param selectionProbabilities character() indentifying the columns in 'sample' with selection probabilites for the sampling units.
+#' @return numeric() estimate of total
+#' @examples
+#'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
+#'                                   numAtAgeSample, "SSUinclusionProb")}
+#'  exampleSamples <- lotteryEstimator::NSSH2019
+#'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+#'  covariance <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
+#' @export
+hierarchicalHansenHurwitzCovariance <- function(sample, sampleId, subEstimator, subCovarianceEstimator, selectionProbabilities){
+  sampleTotals <- list()
+  sampleCovariances <- list()
+  sProb <- list()
+  for (id in unique(sample[[sampleId]])){
+    sampleUnitData <- sample[sample[[sampleId]] == id,]
+    sProb[[id]] <- sampleUnitData[[selectionProbabilities]][1]
+    sampleTotals[[id]] <- subEstimator(sampleUnitData)
+    sampleCovariances[[id]] <- subCovarianceEstimator(sampleUnitData)
+  }
+
+  intra <- hansenHurwitzIntra(sampleCovariances, unlist(sProb))
+  inter <- hansenHurwitzCovariance(sampleTotals, unlist(sProb))
+
+  return(intra + inter)
+
+}
+
 #' Horvitz-Thompson estimator
 #' @description
 #'  Horvitz-Thompson estimator of the population total for a set of population parameters.
@@ -144,6 +211,30 @@ horvitzThompson <- function(sampleTotals, inclusionProbabilities){
 
 }
 
+#' Hierarchical Howritz Thompson
+#' @description
+#'  \code{\link[lotteryEstimator]{HierarchicalEstimator}} for applying
+#'  \code{\link[lotteryEstimator]{horvitzThompson}} in hierarchical implementations.
+#' @details
+#'  Example provided in the documentation for \code{\link[lotteryEstimator]{hierarchicalHansenHurwitz}}
+#' @param sample \code{\link[data.table]{data.table}} with sample data
+#' @param sampleId character() identifying the columns in 'sample' that identify the sampling units to estimate from
+#' @param subEstimator function, function for estimating totals for each sample
+#' @param inclusionProbabilities character() indentifying the columns in 'sample' with inclusion probabilites for the sampling units.
+#' @return numeric() estimate of total
+#' @export
+hierarchicalHorwitzThompson <- function(sample, sampleId, subEstimator, inclusionProbabilities){
+  sampleTotals <- list()
+  iProb <- list()
+  for (id in unique(sample[[sampleId]])){
+    sampleUnitData <- sample[sample[[sampleId]] == id,]
+    iProb[[id]] <- sampleUnitData[[inclusionProbabilities]][1]
+    sampleTotals[[id]] <- subEstimator(sampleUnitData)
+  }
+  return(horvitzThompson(sampleTotals, unlist(iProb)))
+
+}
+
 #' Covariance of Horvitz-Thompson estimator
 #' @description
 #'  Estimator of the covariance of a Horvitz-Thompson estimate for single stage sampling without replacement.
@@ -157,6 +248,7 @@ horvitzThompson <- function(sampleTotals, inclusionProbabilities){
 #' @param inclusionProbabilities numeric() vector of inclusion probabilites for the samples whoose covariance are listed in 'sampleCovariances'.
 #' @param coInclusionProbabilities matrix()  of co-inclusion probabilites (joint-inclusionprobabilities) for the samples whoose covariance are listed in 'sampleCovariances'.
 #' @return matrix() representing a symmetric matrix with the estimated covariances.
+#' @noRd
 horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coInclusionProbabilities){
   if (length(sampleTotals) != length(inclusionProbabilities)){
     stop("inclusionProbabilities does not correspond to the listed sample covariances")
@@ -199,6 +291,7 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
 #' @param inclusionProbabilities numeric() vector of inclusion probabilites for the samples whoose covariance are listed in 'sampleCovariances'.
 #' @return data.table() representing a symmetric matrix with the estimated covariances.
 #' @return matrix() representing a symmetric matrix with the estimated covariances. intra-unit covariances.
+#' @noRd
 horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
   if (length(sampleCovariances) != length(inclusionProbabilities)){
     stop("inclusionProbabilities does not correspond to the listed sample covariances")
@@ -234,21 +327,51 @@ estimateFromStrataTotals <- function(stratifiedCatchAtAge){
   return(estimate)
 }
 
-#' Covariance of sample proprotions
-#' @param proportions vector of size 'n' containging sampled proportions for a categorical variable with 'n' levels
-#' @return matrix() 'n'x'n' matrix with proportion covariances.
-#' @export
-calculateSampleProportionCovariance <- function(proportions){
-  return(diag(proportions) + outer(-proportions, proportions))
-}
 
 #
 # Some datatype conventions
 #
 
+#' Hierarchical estimator
+#'
+#' Function contract for hierarchical estimators.
+#' Hierarchical estimators are estimators that depend on other estimates being made for each sampling unit.
+#' A hierachical estimator will divide the sample into subsets with data for each sampling unit
+#' and call another function to calculate estimates from each of these subsets.
+#'
+#' These functions take three arguments:
+#' \describe{
+#'  \item{sample}{\code{\link{data.table}{data.table}} with the sample to estimate from}
+#'  \item{sampleId}{character() identifying column in 'sample' encoding the sampling units to estimate from}
+#'  \item{subEstimator}{that will provide an estimate for each sampling unit}
+#' }
+#'
+#' @name HierarchicalEstimator
+#'
+NULL
+
+#' Hierarchical covariance estimator
+#'
+#' Function contract for hierarchical covariance estimators.
+#' Hierarchical covariance estimators are estimators that depend on other estimates being made for each sampling unit.
+#' A hierachical covariance estimator will divide the sample into subsets with data for each sampling unit
+#' and call another function to calculate estimates from each of these subsets.
+#'
+#' These functions take three arguments:
+#' \describe{
+#'  \item{sample}{\code{\link{data.table}{data.table}} with the sample to estimate from}
+#'  \item{sampleId}{character() identifying column in 'sample' encoding the sampling units to estimate from}
+#'  \item{subEstimator}{that will provide a point estimate for each sampling unit}
+#'  \item{subCovarianceEstimator}{that will provide a covariance estimate for each sampling unit}
+#' }
+#'
+#' @name HierarchicalCovarianceEstimator
+#'
+NULL
+
 #' Catch at age
 #'
-#' Estiamte of catch at age in numbers
+#' Estimate of catch at age in numbers
 #'
 #' @details
 #'  list with two memebers:

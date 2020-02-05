@@ -21,3 +21,18 @@ countCategorical <- function(sample, categories=NULL){
   names(a) <- categories
   return(a)
 }
+
+#' Covariance of sample proprotions
+#' @param proportions vector of size 'n' containging sampled proportions for a categorical variable with 'n' levels
+#' @return matrix() 'n'x'n' matrix with proportion covariances.
+#' @examples
+#'  ages <- c(4,5,5,6,10)
+#'  categories <- 1:20
+#'  sampleCounts <- countCategorical(ages, categories)
+#'  sampleProrportions <- sampleCounts / sum(sampleCounts)
+#'  covariance <- calculateSampleProportionCovariance(sampleProrportions)
+#' @export
+calculateSampleProportionCovariance <- function(proportions){
+  return(diag(proportions) + outer(-proportions, proportions))
+}
+
