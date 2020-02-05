@@ -36,6 +36,5 @@ covariance of \code{\link[lotteryEstimator]{hansenHurwitz}} in hierarchical impl
                                   numAtAgeSample, "SSUinclusionProb")}
  exampleSamples <- lotteryEstimator::NSSH2019
  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
- numAtAgeTotal <- hierarchicalHansenHurwitz(exampleSamples, "PSUid",
-                                            numAtAgeHaul, "PSUselectionProb")
+ covariance <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
 }
