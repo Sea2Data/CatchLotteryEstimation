@@ -121,7 +121,7 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
 
 #' Estimator for NSSH
 #' @description
-#'  Estimator for 2-stage lottery sampling, assuming with replacement haul-selection and estimating intra-haul variance from sample covariances.
+#'  Estimator for 2-stage lottery sampling, assuming with replacement haul-selection and estimating intra-haul variance from bootstrap.
 #' @details
 #'  As \code{\link[lotteryEstimator]{twoStageNsshEstimator}}, but with intra-haul variance bootstrapped
 #'  by selection without replacement.
