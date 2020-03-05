@@ -12,13 +12,14 @@ proportionCategorical(sample, categories = NULL)
 \item{categories}{the categories that was recorded if present in sample.}
 }
 \value{
-named vector with counts in each category
+named vector with proporitons in each category
 }
 \description{
 Calculates the proportion of observations of some category in a sample
 }
 \details{
 Will count non-observed categories as zero
+if 'categories' is NULL, the present values will be used as the complete set of categories
 }
 \examples{
  ages <- c(4,5,5,6,10)

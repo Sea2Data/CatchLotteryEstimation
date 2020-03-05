@@ -24,7 +24,7 @@ twoStageNsshEstimatorBootstrapped(
 estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
 }
 \description{
-Estimator for 2-stage lottery sampling, assuming with replacement haul-selection and estimating intra-haul variance from sample covariances.
+Estimator for 2-stage lottery sampling, assuming with replacement haul-selection and estimating intra-haul variance from bootstrap.
 }
 \details{
 As \code{\link[lotteryEstimator]{twoStageNsshEstimator}}, but with intra-haul variance bootstrapped

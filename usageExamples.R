@@ -19,5 +19,14 @@ plotResults(estimates2st, "NSSH 2019 2stage")
 estimates2stBoot <- twoStageNsshEstimatorBootstrapped(NSSH2019, 1,20,10)
 plotResults(estimates2stBoot, "NSSH 2019 2stageBs")
 
-hist(diag(estimates$covariance) - diag(estimates2st$covariance))
-hist(diag(estimates$covariance) - diag(estimates2stBoot$covariance))
+str <- NSSH2019
+str$lengthStrata <- "all"
+estimates2stStratified <- twoStageNsshEstimatorStratified(str, 1,20)
+plotResults(estimates2stStratified, "NSSH 2019 2stage single strata")
+
+estimates2stStratifiedAct <- twoStageNsshEstimatorStratified(NSSH2019Stratified, 1,20)
+plotResults(estimates2stStratifiedAct, "NSSH 2019 2stage stratified")
+
+hist((diag(estimates$covariance) - diag(estimates2st$covariance)) / sum(diag(estimates$covariance)))
+hist((diag(estimates$covariance) - diag(estimates2stBoot$covariance)) / sum(diag(estimates$covariance)))
+hist((diag(estimates$covariance) - diag(estimates2stStratified$covariance)) / sum(diag(estimates$covariance)))

@@ -96,10 +96,8 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
 #' @export
 twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
 
-  # get number of fish in each SSU
-  nFish <- stats::aggregate(list(nFishSSU=samples$age), by = list(SSUid=samples$SSUid), FUN=length)
-  samples <- merge(samples, nFish, all.x=T)
-  samples$nFishHaul <- samples$nFishSSU * samples$nSSU
+  # get number of fish in each haul
+  samples$nFishHaul <- samples$nFish * samples$nSSU
 
   # estimate for each haul
   numAtAgeHaul <- function(sample){proportionCategorical(sample$age, minAge:maxAge) * sample$nFishHaul[1]}
@@ -108,10 +106,51 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
   numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 
   # sample covariance for for each haul
-  intraHaulCovariance <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, minAge:maxAge)) * (sample$nFishHaul[1]**2 / ((sample$nFishSSU[1])*(sample$nFishSSU[1]-1)))}
+  intraHaulCovariance <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, minAge:maxAge)) * (sample$nFishHaul[1]**2 / ((sample$nFish[1])*(sample$nFish[1]-1)))}
 
   # Hansen Hurwitz for covariance for total
   covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, intraHaulCovariance, "PSUselectionProb")
+
+  result <- list()
+  result$catchAtAge <- numAtAgeTotal
+  result$covariance <- covariance
+  return(result)
+}
+
+#' Estimator for NSSH
+#' @description
+#'  Estimator for 2-stage length-stratified lottery sampling, assuming with replacement haul-selection, and no intra-haul covariance.
+#' @details
+#'  This estimator is applicable for two stage sampling based on the lottery system.
+#'  PSU: haul, assumed UEPWR, Hansen-Hurwitz estimator
+#'  SSU: bucket, assumed SRSWOR
+#' @param samples samples formatted as \code{\link[lotteryEstimator]{NSSH2019}}
+#' @param minAge lowest age to produce estimate for
+#' @param maxAge highest age to produce estimate for
+#' @return estimates, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
+#' @examples
+#'  data(NSSH2019)
+#'  estimates <- twoStageNsshEstimator(NSSH2019, 1,20)
+#' @export
+twoStageNsshEstimatorStratified <- function(samples, minAge=1, maxAge=20){
+
+  lengthStrata <- unique(samples$lengthStrata)
+
+  # get number of fish in each haul
+  samples$nFishHaul <- samples$nFish * samples$nSSU
+
+  # estimate for each haul
+  numAtAgeHaul <- function(sample){
+    m <- sample$nFishHaul[1] * calculateAgeLengthKey(sample$age, sample$lengthStrata, minAge:maxAge, lengthStrata) %*% proportionCategorical(sample$lengthStrata, lengthStrata)
+    v <- as.vector(m)
+    names(v) <- rownames(m)
+    return(v)}
+
+  # Hansen Hurwitz for total (estimating from PSUS)
+  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+
+  # Hansen Hurwitz for covariance for total
+  covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
 
   result <- list()
   result$catchAtAge <- numAtAgeTotal
@@ -136,10 +175,8 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
 #' @export
 twoStageNsshEstimatorBootstrapped <- function(samples, minAge=1, maxAge=20, iterations=10){
 
-  # get number of fish in each SSU
-  nFish <- stats::aggregate(list(nFishSSU=samples$age), by = list(SSUid=samples$SSUid), FUN=length)
-  samples <- merge(samples, nFish, all.x=T)
-  samples$nFishHaul <- samples$nFishSSU * samples$nSSU
+  # get number of fish in each haul
+  samples$nFishHaul <- samples$nFish * samples$nSSU
 
   # estimate for each haul
   numAtAgeHaul <- function(sample){proportionCategorical(sample$age, minAge:maxAge) * sample$nFishHaul[1]}
