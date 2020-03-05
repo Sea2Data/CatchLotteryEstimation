@@ -12,6 +12,7 @@
 \item{PSUselectionProb}{Selection probability for the PSU}
 \item{nSSU}{The total number of SSUs in the population for this PSU}
 \item{SSUselectionProb}{Selection probability for the SSU}
+\item{nFish}{The total number of fish in the population for this SSU}
 \item{age}{The age determied for the fish}
 \item{length}{The length determined for the fish}
 }}

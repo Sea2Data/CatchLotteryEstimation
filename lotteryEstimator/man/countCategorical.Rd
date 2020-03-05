@@ -18,7 +18,8 @@ named vector with counts in each category
 Counts the number of observations of some category in a sample
 }
 \details{
-Will count non-observed categories as zero
+Will count non-observed categories as zero.
+if 'categories' is NULL, the present values will be used as the complete set of categories
 }
 \examples{
  ages <- c(4,5,5,6,10)

@@ -61,7 +61,8 @@ extract_set <- function(datafile="~/bioticsets/v3/biotic_cruiseNumber_19-2019-1_
   tab$PSUselectionProb <- tab$catchweight / totalLanded
   tab$SSUselectionProb <- tab$lengthsampleweight / tab$catchweight
   tab$nSSU <- floor(tab$catchweight / tab$lengthsampleweight)
-  tab <- tab[,c("PSUid", "SSUid", "FishId", "PSUselectionProb", "nSSU", "SSUselectionProb", "age", "length")]
+  tab$nFish <- tab$lengthsamplecount
+  tab <- tab[,c("PSUid", "SSUid", "FishId", "PSUselectionProb", "nSSU", "SSUselectionProb", "nFish", "age", "length")]
 
   return(tab)
 }
