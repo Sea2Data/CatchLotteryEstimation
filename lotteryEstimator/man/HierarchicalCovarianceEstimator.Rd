@@ -5,16 +5,16 @@
 \title{Hierarchical covariance estimator}
 \description{
 Function contract for hierarchical covariance estimators.
-Hierarchical covariance estimators are estimators that depend on other estimates being made for each sampling unit.
-A hierachical covariance estimator will divide the sample into subsets with data for each sampling unit
+Hierarchical covariance estimators are estimators that depend on other estimates being made for partitions of the sample.
+A hierachical covariance estimator will divide the sample into subsets with data for each partition
 and call another function to calculate estimates from each of these subsets.
 }
 \details{
 These functions take three arguments:
 \describe{
 \item{sample}{\code{\link{data.table}{data.table}} with the sample to estimate from}
-\item{sampleId}{character() identifying column in 'sample' encoding the sampling units to estimate from}
-\item{subEstimator}{that will provide a point estimate for each sampling unit}
-\item{subCovarianceEstimator}{that will provide a covariance estimate for each sampling unit}
+\item{...}{other arguments needed to calculate covariance estimates}
 }
+
+A Hierarchical covariance estimator return a covariance matrix with covariances between estimated parameters
 }

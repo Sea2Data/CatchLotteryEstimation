@@ -6,7 +6,7 @@
 \usage{
 hierarchicalHansenHurwitzCovariance(
   sample,
-  sampleId,
+  partitionId,
   subEstimator,
   subCovarianceEstimator,
   selectionProbabilities
@@ -15,11 +15,11 @@ hierarchicalHansenHurwitzCovariance(
 \arguments{
 \item{sample}{\code{\link[data.table]{data.table}} with sample data}
 
-\item{sampleId}{character() identifying the columns in 'sample' that identify the sampling units to estimate from}
+\item{partitionId}{character() identifying the columns in 'sample' that identify the sampling units to estimate from}
 
-\item{subEstimator}{function, function for estimating totals for each sample}
+\item{subEstimator}{function, function for estimating totals for each sampled unit}
 
-\item{subCovarianceEstimator}{function, function for estimating covariances for each sample}
+\item{subCovarianceEstimator}{\code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit}
 
 \item{selectionProbabilities}{character() indentifying the columns in 'sample' with selection probabilites for the sampling units.}
 }

@@ -198,3 +198,16 @@ strata$strata2 <- mockstrata
 result <- estimateFromStrataTotals(strata)
 expect_true(all(result$catchAtAge == 2*mockstrata$catchAtAge))
 expect_true(all(diag(result$covariance) == 2*diag(mockstrata$covariance)))
+
+context("hierarchical strata estimate")
+numAtAgeStrata <- function(sample){proportionCategorical(sample$age, 2:20)*sample$lengthStrataTotal[1]}
+numAtAgeSample <- function(sample){hierarchicalStratifiedTotals(sample, "lengthStrata", numAtAgeStrata)}
+ssuTotal <- numAtAgeSample(NSSH2019Stratified[NSSH2019Stratified$SSUid=="1",])
+expect_equal(ssuTotal[["4"]],1)
+expect_equal(ssuTotal[["6"]],6+3+1+7.5)
+
+context("hierarchical strata covariance estimate")
+ageCovarianceStrata <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, 2:20)) * (sample$lengthStrataTotal[1]**2 / ((nrow(sample))*(nrow(sample)-1)))}
+ageCovarianceSample <- function(sample){hierarchicalStratifiedCovariance(sample, "lengthStrata", ageCovarianceStrata)}
+ssuCov <- ageCovarianceSample(NSSH2019Stratified[NSSH2019Stratified$SSUid=="1",])
+expect_equal(ssuCov[["4","4"]],.5)

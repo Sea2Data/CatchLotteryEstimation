@@ -6,7 +6,7 @@
 \usage{
 hierarchicalHansenHurwitz(
   sample,
-  sampleId,
+  partitionId,
   subEstimator,
   selectionProbabilities
 )
@@ -14,9 +14,9 @@ hierarchicalHansenHurwitz(
 \arguments{
 \item{sample}{\code{\link[data.table]{data.table}} with sample data}
 
-\item{sampleId}{character() identifying the columns in 'sample' that identify the sampling units to estimate from}
+\item{partitionId}{character() identifying the columns in 'sample' that identify the sampling units to estimate from}
 
-\item{subEstimator}{function, function for estimating totals for each sample}
+\item{subEstimator}{\code{\link[lotteryEstimator]{ParameterizedEstimator}} for estimating totals for each sampled unit}
 
 \item{selectionProbabilities}{character() indentifying the columns in 'sample' with selection probabilites for the sampling units.}
 }

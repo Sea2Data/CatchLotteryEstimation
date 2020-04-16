@@ -5,15 +5,17 @@
 \title{Hierarchical estimator}
 \description{
 Function contract for hierarchical estimators.
-Hierarchical estimators are estimators that depend on other estimates being made for each sampling unit.
-A hierachical estimator will divide the sample into subsets with data for each sampling unit
+Hierarchical estimators are estimators that depend on other estimates being made for partitions of the sample.
+Such partitions can be lower level sampling units, clusters or strata.
+A hierachical estimator will divide the sample into subsets with data for each partition
 and call another function to calculate estimates from each of these subsets.
 }
 \details{
 These functions take three arguments:
 \describe{
 \item{sample}{\code{\link{data.table}{data.table}} with the sample to estimate from}
-\item{sampleId}{character() identifying column in 'sample' encoding the sampling units to estimate from}
-\item{subEstimator}{that will provide an estimate for each sampling unit}
+\item{...}{other arguments needed to calculate estimate}
 }
+
+A hierarchical estimators return a vector of estimated parameters.
 }
