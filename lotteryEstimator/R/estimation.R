@@ -403,7 +403,9 @@ hierarchicalHorwitzThompson <- function(sample, partitionId, subEstimator, inclu
 #' Parameterized estimators return a named numeric vector with parameter estimates
 #'
 #' @examples
-#'  # A parameterized estimator can be obtained from \code{\link[lotteryEstimator]{HierarchicalEstimator}} by fixing parameters:
+#'  # A parameterized estimator can be obtained from
+#'  # \code{\link[lotteryEstimator]{HierarchicalEstimator}}
+#'  # by fixing parameters.
 #'  # For example a parametierized Horwitz-Thomposon estimator:
 #'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
 #'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
