@@ -487,7 +487,7 @@ NULL
 #'
 NULL
 
-#' Stratified catch at age
+#' Stratified catch at age - REMOVE ?
 #'
 #' Stratified Estimate of catch at age in numbers
 #'
@@ -499,5 +499,6 @@ NULL
 #'
 #'
 #' @name stratifiedCatchAtAge
+#' @noRd
 #'
 NULL
