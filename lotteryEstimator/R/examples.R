@@ -64,10 +64,10 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
   numAtAgeSample <- function(sample){countCategorical(sample$age, minAge:maxAge)}
 
   # Horwitz Thompson for haul (estimating from SSUs)
-  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
+  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
 
   # Hansen Hurwitz for total (estimating from PSUS)
-  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+  numAtAgeTotal <- hierarchicalHansenHurwitzTotals(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 
   # Hansen Hurwitz for covairance, assuming 0 intra-haul covariance
   covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
@@ -103,7 +103,7 @@ twoStageNsshEstimator <- function(samples, minAge=1, maxAge=20){
   numAtAgeHaul <- function(sample){proportionCategorical(sample$age, minAge:maxAge) * sample$nFishHaul[1]}
 
   # Hansen Hurwitz for total (estimating from PSUS)
-  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+  numAtAgeTotal <- hierarchicalHansenHurwitzTotals(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 
   # sample covariance for for each haul
   intraHaulCovariance <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, minAge:maxAge)) * (sample$nFishHaul[1]**2 / ((sample$nFish[1])*(sample$nFish[1]-1)))}
@@ -147,7 +147,7 @@ twoStageNsshEstimatorStratified <- function(samples, minAge=1, maxAge=20){
     return(v)}
 
   # Hansen Hurwitz for total (estimating from PSUS)
-  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+  numAtAgeTotal <- hierarchicalHansenHurwitzTotals(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 
   # Hansen Hurwitz for covariance for total
   covariance <- hierarchicalHansenHurwitzCovariance(samples, "PSUid", numAtAgeHaul, function(x){0}, "PSUselectionProb")
@@ -182,7 +182,7 @@ twoStageNsshEstimatorBootstrapped <- function(samples, minAge=1, maxAge=20, iter
   numAtAgeHaul <- function(sample){proportionCategorical(sample$age, minAge:maxAge) * sample$nFishHaul[1]}
 
   # Hansen Hurwitz for total (estimating from PSUS)
-  numAtAgeTotal <- hierarchicalHansenHurwitz(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
+  numAtAgeTotal <- hierarchicalHansenHurwitzTotals(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
 
   # bootstrapped WOR covariance for for each haul
   intraHaulCovariance <- function(sample){bootstrap(sample, numAtAgeHaul, iterations, c("FishId"), replacement = c(F), popSize = c("nFishHaul"))$covariances}

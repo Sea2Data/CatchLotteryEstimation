@@ -4,7 +4,8 @@
 \name{NSSH2019}
 \alias{NSSH2019}
 \title{Example data - Norwegian Spring Spawning Herring sampled in 2019}
-\format{\code{\link[data.table]{data.table}} one row for each measured fish and with columns:
+\format{
+\code{\link[data.table]{data.table}} one row for each measured fish and with columns:
 \describe{
 \item{PSUid}{Identifier for the primary sampling unit (PSU) the fish was sampled from}
 \item{SSUid}{Identifier for the secondary sampling unit (SSU) the fish was sampled from. Identifier is unique across all PSUs}
@@ -15,7 +16,8 @@
 \item{nFish}{The total number of fish in the population for this SSU}
 \item{age}{The age determied for the fish}
 \item{length}{The length determined for the fish}
-}}
+}
+}
 \usage{
 data(NSSH2019)
 }

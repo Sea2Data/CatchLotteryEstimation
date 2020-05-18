@@ -223,12 +223,12 @@ horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
 
 }
 
-#' Estimate total
+#' Estimate total - REMOVE ?
 #' @description
 #'  Estimates total catch at age from estiamtes in strata.
 #' @param stratifiedCatchAtAge estimates in each strata, formatted as \code{\link[lotteryEstimator]{stratifiedCatchAtAge}}
 #' @return estimates of total catch at age, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
-#' @export
+#' @noRd
 estimateFromStrataTotals <- function(stratifiedCatchAtAge){
   estimate <- list()
   estimate$catchAtAge <- Reduce('+', lapply(stratifiedCatchAtAge, FUN=function(x){x$catchAtAge}))
@@ -265,7 +265,7 @@ hierarchicalStratifiedTotals <- function(sample, partitionId, subEstimator){
 
 #' Hierarchical stratified estimate
 #' @description
-#'  \code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating totals for a stratified sample
+#'  \code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating covariances for a stratified sample
 #' @param sample \code{\link[data.table]{data.table}} with sample data
 #' @param partitionId character() identifying the columns in 'sample' that identify the strata to estimate from
 #' @param subEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each strata
@@ -302,14 +302,14 @@ hierarchicalStratifiedCovariance <- function(sample, partitionId, subEstimator){
 #' @return numeric() estimate of total
 #' @examples
 #'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
-#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
+#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
 #'                                   numAtAgeSample, "SSUinclusionProb")}
 #'  exampleSamples <- lotteryEstimator::NSSH2019
 #'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
-#'  numAtAgeTotal <- hierarchicalHansenHurwitz(exampleSamples, "PSUid",
+#'  numAtAgeTotal <- hierarchicalHansenHurwitzTotals(exampleSamples, "PSUid",
 #'                                             numAtAgeHaul, "PSUselectionProb")
 #' @export
-hierarchicalHansenHurwitz <- function(sample, partitionId, subEstimator, selectionProbabilities){
+hierarchicalHansenHurwitzTotals <- function(sample, partitionId, subEstimator, selectionProbabilities){
 
   if (!is.character(sample[[partitionId]])){
     stop("partitionId must be a character")
@@ -338,7 +338,7 @@ hierarchicalHansenHurwitz <- function(sample, partitionId, subEstimator, selecti
 #' @return numeric() estimate of total
 #' @examples
 #'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
-#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
+#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
 #'                                   numAtAgeSample, "SSUinclusionProb")}
 #'  exampleSamples <- lotteryEstimator::NSSH2019
 #'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
@@ -369,14 +369,14 @@ hierarchicalHansenHurwitzCovariance <- function(sample, partitionId, subEstimato
 #'  \code{\link[lotteryEstimator]{HierarchicalEstimator}} for applying
 #'  \code{\link[lotteryEstimator]{horvitzThompson}} in hierarchical implementations.
 #' @details
-#'  Example provided in the documentation for \code{\link[lotteryEstimator]{hierarchicalHansenHurwitz}}
+#'  Example provided in the documentation for \code{\link[lotteryEstimator]{hierarchicalHansenHurwitzTotals}}
 #' @param sample \code{\link[data.table]{data.table}} with sample data
 #' @param partitionId character() identifying the columns in 'sample' that identify the sampling units to estimate from
 #' @param subEstimator \code{\link[lotteryEstimator]{ParameterizedEstimator}} for estimating totals for each sample
 #' @param inclusionProbabilities character() indentifying the columns in 'sample' with inclusion probabilites for the sampling units.
 #' @return numeric() estimate of total
 #' @export
-hierarchicalHorwitzThompson <- function(sample, partitionId, subEstimator, inclusionProbabilities){
+hierarchicalHorwitzThompsonTotals <- function(sample, partitionId, subEstimator, inclusionProbabilities){
   sampleTotals <- list()
   iProb <- list()
   for (id in unique(sample[[partitionId]])){
@@ -408,7 +408,7 @@ hierarchicalHorwitzThompson <- function(sample, partitionId, subEstimator, inclu
 #'  # by fixing parameters.
 #'  # For example a parametierized Horwitz-Thomposon estimator:
 #'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
-#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
+#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
 #'                                   numAtAgeSample, "SSUinclusionProb")}
 #'
 #'

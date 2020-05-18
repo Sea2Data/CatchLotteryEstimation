@@ -17,5 +17,5 @@ hierarchicalStratifiedCovariance(sample, partitionId, subEstimator)
 matrix of covariance estimates
 }
 \description{
-\code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating totals for a stratified sample
+\code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating covariances for a stratified sample
 }

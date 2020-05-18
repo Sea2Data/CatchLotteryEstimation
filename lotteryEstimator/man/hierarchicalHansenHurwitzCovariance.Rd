@@ -32,7 +32,7 @@ covariance of \code{\link[lotteryEstimator]{hansenHurwitz}} in hierarchical impl
 }
 \examples{
  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
- numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
+ numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
                                   numAtAgeSample, "SSUinclusionProb")}
  exampleSamples <- lotteryEstimator::NSSH2019
  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU

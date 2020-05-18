@@ -18,7 +18,7 @@ Parameterized estimators return a named numeric vector with parameter estimates
  # by fixing parameters.
  # For example a parametierized Horwitz-Thomposon estimator:
  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
- numAtAgeHaul <- function(sample){hierarchicalHorwitzThompson(sample, "SSUid",
+ numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
                                   numAtAgeSample, "SSUinclusionProb")}
 
 
