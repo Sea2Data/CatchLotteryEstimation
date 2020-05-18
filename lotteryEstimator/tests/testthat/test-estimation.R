@@ -145,9 +145,9 @@ expect_lte((covarInter[1] - 233.28*233.28) / covarInter[1], 0.0001) #checked aga
 
 covar <- covarInter + covarIntra
 
-context("hierarchicalHansenHurwitz and hierarchicalHorwitzThompson")
+context("hierarchicalHansenHurwitz and hierarchicalHorvitzThompson")
 numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
-numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
+numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
 exampleSamples <- lotteryEstimator::NSSH2019
 exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb #only one SSU sampled pr PSU in example
 numAtAgeTotal <- hierarchicalHansenHurwitzTotals(exampleSamples, "PSUid", numAtAgeHaul, "PSUselectionProb")
@@ -175,19 +175,80 @@ expect_equal(ht[1], manual[1])
 expect_equal(ht[2], manual[2])
 
 
+context("Horvitz-Thompson covariance estimator, data cheks")
+samples <- list()
+samples[["2"]] <- 6
+samples[["1"]] <- 20
+
+inclusionProbabilities <- c((1-(1-.1)**2),(1-(1-.3)**2))
+names(inclusionProbabilities) <- c("1", "2")
+coInclusionProbabilities <- matrix(c(NA,sum(inclusionProbabilities) - (1-(1-.1-.3)**2),
+                                     sum(inclusionProbabilities) - (1-(1-.3-.1)**2),NA), nrow=2)
+rownames(coInclusionProbabilities) <- c("1", "2")
+colnames(coInclusionProbabilities) <- c("1", "2")
+expect_error(horvitzThompsonCovariance(samples, inclusionProbabilities, coInclusionProbabilities), "Vector names does not match between sampleTotals and inclusionProbabilities")
+names(inclusionProbabilities) <- c("2", "1")
+expect_error(horvitzThompsonCovariance(samples, inclusionProbabilities, coInclusionProbabilities), "Vector names does not match between sampleTotals and coInclusionProbabilities")
+
 context("Horvitz-Thompson covariance estimator")
 
 #testing against example at http://wiki.awf.forst.uni-goettingen.de/wiki/index.php/Horvitz-Thompson_estimator_example
 samples <- list()
-samples[[1]] <- 6
-samples[[2]] <- 20
+samples[["1"]] <- 6
+samples[["2"]] <- 20
 
-inclusionProbabilities <- c(2/3,2/3)
-coInclusionProbabilities <- matrix(c(NA,1,
-                                     1,NA), nrow=2)
+inclusionProbabilities <- c((1-(1-.1)**2),(1-(1-.3)**2))
+names(inclusionProbabilities) <- c("1", "2")
+coInclusionProbabilities <- matrix(c(NA,sum(inclusionProbabilities) - (1-(1-.1-.3)**2),
+                                     sum(inclusionProbabilities) - (1-(1-.3-.1)**2),NA), nrow=2)
+rownames(coInclusionProbabilities) <- c("1", "2")
+colnames(coInclusionProbabilities) <- c("1", "2")
 
 ht <- horvitzThompson(samples, inclusionProbabilities)
-expect_equal(ht, 39)
+htTrue <- 70.79
+expect_true(abs(ht-htTrue) < .005)
+covMono <- horvitzThompsonCovariance(samples, inclusionProbabilities, coInclusionProbabilities)
+
+covMonoTrue <- (1-inclusionProbabilities[1])*6**2 / inclusionProbabilities[1]**2
+covMonoTrue <- covMonoTrue + (1-inclusionProbabilities[2])*20**2 / inclusionProbabilities[2]**2
+covMonoTrue <- covMonoTrue + (coInclusionProbabilities[1,2] - inclusionProbabilities[1]*inclusionProbabilities[2]) * 6*20 / (inclusionProbabilities[1]*inclusionProbabilities[2]*coInclusionProbabilities[1,2])
+covMonoTrue <- covMonoTrue + (coInclusionProbabilities[2,1] - inclusionProbabilities[2]*inclusionProbabilities[1]) * 20*6 / (inclusionProbabilities[2]*inclusionProbabilities[1]*coInclusionProbabilities[2,1])
+expect_equal(covMono[[1]], covMonoTrue[[1]])
+
+context("Horvitz-Thompson covariance estimator, multivariate")
+samples <- list()
+samples[["1"]] <- c(6,6)
+samples[["2"]] <- c(20,20)
+
+inclusionProbabilities <- c((1-(1-.1)**2),(1-(1-.3)**2))
+names(inclusionProbabilities) <- c("1", "2")
+coInclusionProbabilities <- matrix(c(NA,sum(inclusionProbabilities) - (1-(1-.1-.3)**2),
+                                     sum(inclusionProbabilities) - (1-(1-.1-.3)**2),NA), nrow=2)
+rownames(coInclusionProbabilities) <- c("1", "2")
+colnames(coInclusionProbabilities) <- c("1", "2")
+
+ht <- horvitzThompson(samples, inclusionProbabilities)
+expect_true(all(abs(ht-htTrue) < .005))
+cov <- horvitzThompsonCovariance(samples, inclusionProbabilities, coInclusionProbabilities)
+expect_true(all((diag(cov)-as.vector(covMono)) < 1e-11))
+
+context("Horvitz-Thompson covariance estimator, multivariate covar")
+samples <- list()
+samples[["1"]] <- c(6,3)
+samples[["2"]] <- c(20,10)
+
+inclusionProbabilities <- c((1-(1-.1)**2),(1-(1-.3)**2))
+names(inclusionProbabilities) <- c("1", "2")
+coInclusionProbabilities <- matrix(c(NA,sum(inclusionProbabilities) - (1-(1-.1-.3)**2),
+                                     sum(inclusionProbabilities) - (1-(1-.1-.3)**2),NA), nrow=2)
+rownames(coInclusionProbabilities) <- c("1", "2")
+colnames(coInclusionProbabilities) <- c("1", "2")
+
+ht <- horvitzThompson(samples, inclusionProbabilities)
+expect_true(abs(ht[1]-htTrue) < .005)
+cov <- horvitzThompsonCovariance(samples, inclusionProbabilities, coInclusionProbabilities)
+expect_equal(cov[1,2], cov[2,1])
+expect_equal(cov[1,1], covMono[1,1])
 
 context("strata totals estimator")
 mockstrata <- simpleNsshEstimatorReference(NSSH2019)

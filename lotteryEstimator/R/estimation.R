@@ -155,9 +155,9 @@ horvitzThompson <- function(sampleTotals, inclusionProbabilities){
 #'
 #' @param sampleTotals list() of numeric() vectors, each corresponding to a sample of the population parameters to be estimated.
 #' @param inclusionProbabilities numeric() vector of inclusion probabilites for the samples whoose covariance are listed in 'sampleCovariances'.
-#' @param coInclusionProbabilities matrix()  of co-inclusion probabilites (joint-inclusionprobabilities) for the samples whoose covariance are listed in 'sampleCovariances'.
+#' @param coInclusionProbabilities matrix() matrix of co-inclusion probabilites (joint-inclusionprobabilities) for the samples whoose covariance are listed in 'sampleCovariances'.
 #' @return matrix() representing a symmetric matrix with the estimated covariances.
-#' @noRd
+#' @export
 horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coInclusionProbabilities){
   if (length(sampleTotals) != length(inclusionProbabilities)){
     stop("inclusionProbabilities does not correspond to the listed sample covariances")
@@ -165,19 +165,40 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
   if (any(inclusionProbabilities > 1) | any(inclusionProbabilities <= 0)){
     stop("all inclusionProbabilities must be in [0,1>")
   }
-  warning("Not tested")
-  sumSamples <- (1-inclusionProbabilities[1]) * outer(sampleTotals[[1]], sampleTotals[[1]]) / inclusionProbabilities[1]**2
+
+  sampNames <- names(sampleTotals)
+  inclNames <- names(inclusionProbabilities)
+  rowNames <- rownames(coInclusionProbabilities)
+  colNames <- colnames(coInclusionProbabilities)
+
+  if (!is.null(sampNames) & !is.null(inclNames)){
+    if (!(all(sampNames == inclNames))){
+      stop("Vector names does not match between sampleTotals and inclusionProbabilities")
+    }
+  }
+  if (!is.null(sampNames) & !is.null(rowNames)){
+    if (!(all(sampNames == rowNames))){
+      stop("Vector names does not match between sampleTotals and coInclusionProbabilities")
+    }
+  }
+  if (!is.null(sampNames) & !is.null(colNames)){
+    if (!(all(sampNames == colNames))){
+      stop("Vector names does not match between sampleTotals and coInclusionProbabilities")
+    }
+  }
+
+  sumSamples <- (1-inclusionProbabilities[1]) * diag(as.matrix(diag(outer(sampleTotals[[1]], sampleTotals[[1]])))) / inclusionProbabilities[1]**2
 
   if (length(sampleTotals) > 1){
     for (i in 2:length(sampleTotals)){
-      sumSamples <- sumSamples + (1-inclusionProbabilities[i]) * outer(sampleTotals[[i]], sampleTotals[[i]]) / inclusionProbabilities[i]**2
+      sumSamples <- sumSamples + (1-inclusionProbabilities[i]) * diag(as.matrix(diag(outer(sampleTotals[[i]], sampleTotals[[i]])))) / inclusionProbabilities[i]**2
     }
   }
 
   for (i in 1:length(sampleTotals)){
-    for (j in i:length(sampleTotals)){
+    for (j in 1:length(sampleTotals)){
       if (i != j){
-        sumSamples <- sumSamples + (coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * outer(sampleTotals[[i]], sampleTotals[[j]]) / (coInclusionProbabilities[i,j] *inclusionProbabilities[i] * inclusionProbabilities[j])
+        sumSamples <- sumSamples + (coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * outer(sampleTotals[[i]], sampleTotals[[j]]) / (coInclusionProbabilities[i,j] * inclusionProbabilities[i] * inclusionProbabilities[j])
       }
     }
   }
@@ -302,7 +323,7 @@ hierarchicalStratifiedCovariance <- function(sample, partitionId, subEstimator){
 #' @return numeric() estimate of total
 #' @examples
 #'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
-#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
+#'  numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid",
 #'                                   numAtAgeSample, "SSUinclusionProb")}
 #'  exampleSamples <- lotteryEstimator::NSSH2019
 #'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
@@ -338,7 +359,7 @@ hierarchicalHansenHurwitzTotals <- function(sample, partitionId, subEstimator, s
 #' @return numeric() estimate of total
 #' @examples
 #'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
-#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
+#'  numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid",
 #'                                   numAtAgeSample, "SSUinclusionProb")}
 #'  exampleSamples <- lotteryEstimator::NSSH2019
 #'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
@@ -364,7 +385,7 @@ hierarchicalHansenHurwitzCovariance <- function(sample, partitionId, subEstimato
 
 }
 
-#' Hierarchical Howritz Thompson
+#' Hierarchical Horvitz Thompson
 #' @description
 #'  \code{\link[lotteryEstimator]{HierarchicalEstimator}} for applying
 #'  \code{\link[lotteryEstimator]{horvitzThompson}} in hierarchical implementations.
@@ -376,7 +397,7 @@ hierarchicalHansenHurwitzCovariance <- function(sample, partitionId, subEstimato
 #' @param inclusionProbabilities character() indentifying the columns in 'sample' with inclusion probabilites for the sampling units.
 #' @return numeric() estimate of total
 #' @export
-hierarchicalHorwitzThompsonTotals <- function(sample, partitionId, subEstimator, inclusionProbabilities){
+hierarchicalHorvitzThompsonTotals <- function(sample, partitionId, subEstimator, inclusionProbabilities){
   sampleTotals <- list()
   iProb <- list()
   for (id in unique(sample[[partitionId]])){
@@ -388,6 +409,40 @@ hierarchicalHorwitzThompsonTotals <- function(sample, partitionId, subEstimator,
 
 }
 
+
+#' Hierarchical Horvitz-Thompson covariance
+#' @description
+#'  \code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating
+#'  covariance of \code{\link[lotteryEstimator]{horvitzThompson}} in hierarchical implementations.
+#' @param sample \code{\link[data.table]{data.table}} with sample data
+#' @param partitionId character() identifying the columns in 'sample' that identify the sampling units to estimate from
+#' @param subEstimator function, function for estimating totals for each sampled unit
+#' @param subCovarianceEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit
+#' @param inclusionProbabilities character() indentifying the columns in 'sample' with inclusion probabilites for the sampling units.
+#' @param coInclusionMatrix matrix() named matrix with co-inclusion probabilites, indexed with the names in the column identified by 'inclusionProbabilities'.
+#' @return numeric() estimate of total
+#' @examples
+#' @export
+hierarchicalHorvitzThompsonCovariance <- function(sample, partitionId, subEstimator, subCovarianceEstimator, inclusionProbabilities, coInclusionMatrix){
+
+  warning("Not tested")
+
+  sampleTotals <- list()
+  sampleCovariances <- list()
+  sProb <- list()
+  for (id in unique(sample[[partitionId]])){
+    sampleUnitData <- sample[sample[[partitionId]] == id,]
+    sProb[[id]] <- sampleUnitData[[selectionProbabilities]][1]
+    sampleTotals[[id]] <- subEstimator(sampleUnitData)
+    sampleCovariances[[id]] <- subCovarianceEstimator(sampleUnitData)
+  }
+
+  intra <- hansenHurwitzIntra(sampleCovariances, unlist(sProb))
+  inter <- hansenHurwitzCovariance(sampleTotals, unlist(sProb))
+
+  return(intra + inter)
+
+}
 
 #
 # Some datatype conventions
@@ -408,7 +463,7 @@ hierarchicalHorwitzThompsonTotals <- function(sample, partitionId, subEstimator,
 #'  # by fixing parameters.
 #'  # For example a parametierized Horwitz-Thomposon estimator:
 #'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
-#'  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
+#'  numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid",
 #'                                   numAtAgeSample, "SSUinclusionProb")}
 #'
 #'

@@ -29,7 +29,7 @@ numeric() estimate of total
 }
 \examples{
  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
- numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid",
+ numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid",
                                   numAtAgeSample, "SSUinclusionProb")}
  exampleSamples <- lotteryEstimator::NSSH2019
  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
