@@ -64,7 +64,7 @@ simpleNsshEstimator <- function(samples, minAge=1, maxAge=20){
   numAtAgeSample <- function(sample){countCategorical(sample$age, minAge:maxAge)}
 
   # Horwitz Thompson for haul (estimating from SSUs)
-  numAtAgeHaul <- function(sample){hierarchicalHorwitzThompsonTotals(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
+  numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
 
   # Hansen Hurwitz for total (estimating from PSUS)
   numAtAgeTotal <- hierarchicalHansenHurwitzTotals(samples, "PSUid", numAtAgeHaul, "PSUselectionProb")
