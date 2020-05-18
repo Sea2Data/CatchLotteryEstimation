@@ -24,7 +24,7 @@ hierarchicalHorvitzThompsonCovariance(
 
 \item{inclusionProbabilities}{character() indentifying the columns in 'sample' with inclusion probabilites for the sampling units.}
 
-\item{coInclusionMatrix}{matrix() named matrix with co-inclusion probabilites, indexed with the names in the column identified by 'inclusionProbabilities'.}
+\item{coInclusionMatrix}{matrix() named matrix with co-inclusion probabilites, indexed with the values in the column identified by 'partitionId'.}
 }
 \value{
 numeric() estimate of total

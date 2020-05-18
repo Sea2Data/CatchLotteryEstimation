@@ -159,6 +159,21 @@ covarianceTotal <- hierarchicalHansenHurwitzCovariance(exampleSamples, "PSUid", 
 covarianceSimpleNSSH <- simpleNsshEstimatorReference(exampleSamples, minAge = 2, maxAge = 20)$covariance
 expect_equivalent(covarianceTotal, covarianceSimpleNSSH)
 
+context("hierarchicalHorvitzThompsonCovariance")
+numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
+exampleSamples <- lotteryEstimator::NSSH2019
+exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb #only one SSU sampled pr PSU in example
+sampleNames <-  exampleSamples$PSUid[!duplicated(exampleSamples$PSUid)]
+incProb <- exampleSamples$PSUinclusionProb[!duplicated(exampleSamples$PSUid)]
+names(incProb) <- sampleNames
+coInclusionMatrix <- outer(incProb, incProb)
+colnames(coInclusionMatrix) <- sampleNames
+rownames(coInclusionMatrix) <- sampleNames
+diag(coInclusionMatrix) <- NA
+covarianceTotal <- hierarchicalHorvitzThompsonCovariance(exampleSamples, "PSUid", numAtAgeHaul, function(x){outer(numAtAgeHaul(x)*0, numAtAgeHaul(x)*0)}, "PSUinclusionProb", coInclusionMatrix)
+
+expect_true(all(diag(covarianceTotal)>=0))
 
 context("Horvitz-Thompson estimator")
 
@@ -265,7 +280,7 @@ numAtAgeStrata <- function(sample){proportionCategorical(sample$age, 2:20)*sampl
 numAtAgeSample <- function(sample){hierarchicalStratifiedTotals(sample, "lengthStrata", numAtAgeStrata)}
 ssuTotal <- numAtAgeSample(NSSH2019Stratified[NSSH2019Stratified$SSUid=="1",])
 expect_equal(ssuTotal[["4"]],1)
-expect_equal(ssuTotal[["6"]],6+3+1+7.5)
+expect_equal(ssuTotal[["6"]],6+15+1+6)
 
 context("hierarchical strata covariance estimate")
 ageCovarianceStrata <- function(sample){calculateSampleProportionCovariance(proportionCategorical(sample$age, 2:20)) * (sample$lengthStrataTotal[1]**2 / ((nrow(sample))*(nrow(sample)-1)))}

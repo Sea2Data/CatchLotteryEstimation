@@ -61,6 +61,15 @@ hansenHurwitzCovariance <- function(sampleTotals, selectionProbabilities){
     stop("estimator not defined for less than two samples.")
   }
 
+  sampNames <- names(sampleTotals)
+  selNames <- names(selectionProbabilities)
+
+  if (!is.null(sampNames) & !is.null(selNames)){
+    if (!(all(sampNames == selNames))){
+      stop("Vector names does not match between sampleTotals and selectionProbabilities")
+    }
+  }
+
   point <- hansenHurwitz(sampleTotals, selectionProbabilities)
 
   sumSamples <- outer(sampleTotals[[1]], sampleTotals[[1]])*0
@@ -102,6 +111,15 @@ hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
     stop("all selectionProbabilities must be in [0,1>")
   }
 
+  sampNames <- names(sampleCovariances)
+  selNames <- names(selectionProbabilities)
+
+  if (!is.null(sampNames) & !is.null(selNames)){
+    if (!(all(sampNames == selNames))){
+      stop("Vector names does not match between sampleTotals and selectionProbabilities")
+    }
+  }
+
   sumSamples <- sampleCovariances[[1]] / selectionProbabilities[1]**2
 
   if (length(sampleCovariances) > 1){
@@ -126,7 +144,7 @@ hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
 #' @export
 horvitzThompson <- function(sampleTotals, inclusionProbabilities){
   if (length(sampleTotals) != length(inclusionProbabilities)){
-    stop("inclusionProbabilities does not correspond to the listed sample totals")
+    stop(paste("inclusionProbabilities does not correspond to the listed sample totals (", length(inclusionProbabilities),",", length(sampleTotals), ")"))
   }
   if (any(inclusionProbabilities > 1) | any(inclusionProbabilities <= 0)){
     stop("all inclusionProbabilities must be in [0,1>")
@@ -187,11 +205,11 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
     }
   }
 
-  sumSamples <- (1-inclusionProbabilities[1]) * diag(as.matrix(diag(outer(sampleTotals[[1]], sampleTotals[[1]])))) / inclusionProbabilities[1]**2
+  sumSamples <- (1-inclusionProbabilities[1]) * outer(sampleTotals[[1]], sampleTotals[[1]]) / inclusionProbabilities[1]**2
 
   if (length(sampleTotals) > 1){
     for (i in 2:length(sampleTotals)){
-      sumSamples <- sumSamples + (1-inclusionProbabilities[i]) * diag(as.matrix(diag(outer(sampleTotals[[i]], sampleTotals[[i]])))) / inclusionProbabilities[i]**2
+      sumSamples <- sumSamples + (1-inclusionProbabilities[i]) * outer(sampleTotals[[i]], sampleTotals[[i]]) / inclusionProbabilities[i]**2
     }
   }
 
@@ -221,7 +239,7 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
 #' @param inclusionProbabilities numeric() vector of inclusion probabilites for the samples whoose covariance are listed in 'sampleCovariances'.
 #' @return data.table() representing a symmetric matrix with the estimated covariances.
 #' @return matrix() representing a symmetric matrix with the estimated covariances. intra-unit covariances.
-#' @noRd
+#' @export
 horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
   if (length(sampleCovariances) != length(inclusionProbabilities)){
     stop("inclusionProbabilities does not correspond to the listed sample covariances")
@@ -230,7 +248,14 @@ horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
     stop("all inclusionProbabilities must be in [0,1>")
   }
 
-  warning("Not tested")
+  sampNames <- names(sampleCovariances)
+  inclNames <- names(inclusionProbabilities)
+
+  if (!is.null(sampNames) & !is.null(inclNames)){
+    if (!(all(sampNames == inclNames))){
+      stop("Vector names does not match between sampleTotals and inclusionProbabilities")
+    }
+  }
 
   sumSamples <- sampleCovariances[[1]] / inclusionProbabilities[1]
 
@@ -419,26 +444,27 @@ hierarchicalHorvitzThompsonTotals <- function(sample, partitionId, subEstimator,
 #' @param subEstimator function, function for estimating totals for each sampled unit
 #' @param subCovarianceEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit
 #' @param inclusionProbabilities character() indentifying the columns in 'sample' with inclusion probabilites for the sampling units.
-#' @param coInclusionMatrix matrix() named matrix with co-inclusion probabilites, indexed with the names in the column identified by 'inclusionProbabilities'.
+#' @param coInclusionMatrix matrix() named matrix with co-inclusion probabilites, indexed with the values in the column identified by 'partitionId'.
 #' @return numeric() estimate of total
-#' @examples
 #' @export
 hierarchicalHorvitzThompsonCovariance <- function(sample, partitionId, subEstimator, subCovarianceEstimator, inclusionProbabilities, coInclusionMatrix){
 
-  warning("Not tested")
-
   sampleTotals <- list()
   sampleCovariances <- list()
-  sProb <- list()
+  iProb <- list()
   for (id in unique(sample[[partitionId]])){
     sampleUnitData <- sample[sample[[partitionId]] == id,]
-    sProb[[id]] <- sampleUnitData[[selectionProbabilities]][1]
+    iProb[[id]] <- sampleUnitData[[inclusionProbabilities]][1]
     sampleTotals[[id]] <- subEstimator(sampleUnitData)
     sampleCovariances[[id]] <- subCovarianceEstimator(sampleUnitData)
   }
 
-  intra <- hansenHurwitzIntra(sampleCovariances, unlist(sProb))
-  inter <- hansenHurwitzCovariance(sampleTotals, unlist(sProb))
+  intra <- horvitzThompsonIntra(sampleCovariances, unlist(iProb))
+  inter <- horvitzThompsonCovariance(sampleTotals, unlist(iProb), coInclusionMatrix)
+
+  if (length(intra) != length(inter)){
+    stop("Inter and Intra covariance have different length.")
+  }
 
   return(intra + inter)
 

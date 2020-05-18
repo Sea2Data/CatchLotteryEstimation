@@ -1,4 +1,5 @@
 library(RstoxData)
+library(lotteryEstimator)
 
 #
 # Functions for preparing data for package lotteryEstimator
@@ -59,10 +60,11 @@ extract_set <- function(datafile="~/bioticsets/v3/biotic_cruiseNumber_19-2019-1_
   stopifnot(length(unique(tab$FishId)) == nrow(tab))
 
   tab$PSUselectionProb <- tab$catchweight / totalLanded
+  tab$PSUinclusionProb <- lotteryEstimator::poissonInclusionProbability(tab$PSUselectionProb, length(unique(tab$PSUid)))
   tab$SSUselectionProb <- tab$lengthsampleweight / tab$catchweight
   tab$nSSU <- floor(tab$catchweight / tab$lengthsampleweight)
   tab$nFish <- tab$lengthsamplecount
-  tab <- tab[,c("PSUid", "SSUid", "FishId", "PSUselectionProb", "nSSU", "SSUselectionProb", "nFish", "age", "length")]
+  tab <- tab[,c("PSUid", "SSUid", "FishId", "PSUselectionProb", "PSUinclusionProb", "nSSU", "SSUselectionProb", "nFish", "age", "length")]
 
   return(tab)
 }
