@@ -68,3 +68,37 @@ extract_set <- function(datafile="~/bioticsets/v3/biotic_cruiseNumber_19-2019-1_
 
   return(tab)
 }
+
+#' Makes example population from logbook data
+#' @noRd
+makeExamplePopulation <- function(logbookfile){
+  logb <- RstoxData::readErsFile(logbookfile)
+
+  logb$vesselId <- as.character(as.integer(rank(logb$RC)))
+  logb$opid <- as.character(as.integer(rank(paste(logb$RC, logb$STARTTIDSPUNKT))))
+  logb$timeid <- as.character(as.integer(rank(substr(logb$STARTTIDSPUNKT,1,10))))
+  logb$spaceid <- as.character(as.integer(rank(logb$LOKASJON_START)))
+  logb$spacetimeid <- paste(logb$timeid, logb$spaceid, sep="-")
+
+  # keep operations that caught cod
+  # but keep records of other catch as well
+  codops <- logb$opid[!is.na(logb$FANGSTART_FAO) & logb$FANGSTART_FAO == "COD"]
+  codset <- logb[!is.na(logb$FANGSTART_FAO) & logb$opid %in% codops,]
+
+  #keep only one catch pr species
+  codset$catchid <- paste(codset$opid, codset$FANGSTART_FAO)
+  codset <- codset[!duplicated(codset$catchid),]
+
+  #keep only lines
+  codset <- codset[codset$REDSKAP_FAO == "LLS" | codset$REDSKAP_FAO == "LL",]
+
+
+  codset$speciesFAO <- codset$FANGSTART_FAO
+  codset$wholeWeightKg <- codset$RUNDVEKT
+  codset$gearFAO <- codset$REDSKAP_FAO
+  codset$hookCount <- codset$INNSATS
+  codset$soaktimeHours <- codset$VARIGHET/60.0
+
+  export <- data.table::data.table(codset[,c("vesselId", "timeid", "spaceid", "spacetimeid", "opid", "catchid", "gearFAO", "hookCount", "soaktimeHours", "speciesFAO", "wholeWeightKg")])
+  return(export)
+}

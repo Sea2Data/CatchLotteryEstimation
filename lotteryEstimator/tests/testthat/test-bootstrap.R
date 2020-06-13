@@ -39,7 +39,8 @@ expect_true(all(diag(bs$covariances)>=0))
 expect_true(all(bs$meanEstimate >= 0))
 
 estimator <- function(sample){countCategorical(sample$age, 1:19)}
-bs<-bootstrap(NSSH2019, estimator, 10, hierarchy = c("SSUid", "FishId"), nSamples = c(2,NA), popSize = c("nSSU", NA), replacement=c(FALSE, TRUE))
+NSSH2019$PSUrepl <- 2
+bs<-bootstrap(NSSH2019, estimator, 10, hierarchy = c("SSUid", "FishId"), nSamples = c("PSUrepl",NA), popSize = c("nSSU", NA), replacement=c(FALSE, TRUE))
 expect_equal(bs$iterations, 10)
 expect_equal(length(bs$meanEstimate), 19)
 expect_equal(nrow(bs$covariances), 19)
