@@ -105,9 +105,18 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
 #'
 #' @export
 resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), replacement=rep(T, length(hierarchy)), popSize=rep(NA, length(hierarchy)), prefix=""){
+
+  #
+  # wrap checks in outer functions if needed for performance (due to recursive call and re-checking)
+  #
+
   if (!all(hierarchy %in% names(samples))){
     missing <- hierarchy[!(hierarchy %in% names(samples))]
     stop("Not all stages identified in hierarchy are present in sample. Missing: ", paste(missing, collapse=","))
+  }
+  if (!all(nSamples[!is.na(nSamples)] %in% names(samples))){
+    missing <- nSamples[!is.na(nSamples) & !(nSamples %in% names(samples))]
+    stop("Not all nSamples columns are present in sample. Missing: ", paste(missing, collapse=","))
   }
   if (length(hierarchy) != length(replacement)){
     stop("hierarchy and replacement must be of same length.")
@@ -118,6 +127,7 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
   if (length(hierarchy) != length(popSize)){
     stop("hierarchy and popSize must be of same length.")
   }
+
   for (h in hierarchy){
     if (!is.character(samples[[h]])){
       stop(paste("Columns identifying sampling units must be character(),",h,"is not."))
@@ -185,7 +195,9 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
 
       newname <- paste(prefix,currentStage,":",u,"#",i,sep="")
       newprefix <- paste(newname,"/", sep="")
-      rs <- resample(uSamples[,names(uSamples)[names(uSamples) != currentStage]], restStages, restN, restRepl, restPop, newprefix)
+
+      cols <- names(uSamples)[names(uSamples) != currentStage]
+      rs <- resample(uSamples[,cols], restStages, restN, restRepl, restPop, newprefix)
       rs[[currentStage]] <- newname
       result <- rbind(rs, result)
 
