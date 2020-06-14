@@ -1,0 +1,140 @@
+---
+title: "defining_estimator"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{defining_estimator}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(lotteryEstimator)
+```
+
+```{r}
+str(examplePopulation)
+```
+
+```{r}
+sample <- sampleExamplePopulation(10, 10)
+str(sample)
+```
+
+## sample statistics
+
+```{r}
+totalCatch <- function(sample, species=c("COD", "HAD")){
+  catches <- c()
+  for (s in species){
+    if (s %in% sample$speciesFAO){
+      catches <- c(catches, sum(sample$wholeWeightKg[sample$speciesFAO==s]))
+    }
+    else{
+      catches <- c(catches, 0)
+    }
+  }
+  names(catches) <- species
+  return(catches)
+}
+
+```
+
+
+## Horwitz-Thompson estimation design: vessel, operation
+
+```{r}
+stage2HTtotal <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "opid", totalCatch, "ipSSU")}
+
+```
+
+```{r}
+stage2HTvariance <- function(sample){
+  
+  # get pairwise joint inclusion probabilities for SRSWOR
+  stopifnot(length(unique(sample$nSSU)) == 1)
+  stopifnot(length(unique(sample$Nssu)) == 1)
+  n <- sample$nSSU[1]
+  N <- sample$Nssu[1]
+  
+  jointInc <- srsworJointInclusionProbabilityMatrix(n,N)
+  rownames(jointInc) <- unique(sample$opid)
+  colnames(jointInc) <- unique(sample$opid)
+  
+  hierarchicalHorvitzThompsonCovariance(sample, 
+                                        "opid", 
+                                        totalCatch, 
+                                        NULL, #there are no inter-species covariances of total cacth in one operation
+                                        "ipSSU", 
+                                        jointInc)
+  
+  }
+```
+
+```{r}
+stage1HTtotal <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "vesselId", stage2HTtotal, "ipPSU")}
+```
+
+```{r}
+stage1HTvariance <- function(sample){
+  
+  # get pairwise joint inclusion probabilities for SRSWOR
+  stopifnot(length(unique(sample$nPSU)) == 1)
+  stopifnot(length(unique(sample$Npsu)) == 1)
+  n <- sample$nPSU[1]
+  N <- sample$Npsu[1]
+  
+  jointInc <- srsworJointInclusionProbabilityMatrix(n,N)
+  rownames(jointInc) <- unique(sample$vesselId)
+  colnames(jointInc) <- unique(sample$vesselId)
+  
+  hierarchicalHorvitzThompsonCovariance(sample, 
+                                        "vesselId", 
+                                        stage2HTtotal, 
+                                        stage2HTvariance, # each sample is one observation, so the covariance is 0
+                                        "ipPSU", 
+                                        jointInc)
+  
+  }
+```
+
+
+```{r echo=F}
+total <- totalCatch(examplePopulation)
+samplesize <- c()
+estimates <- c()
+se <- c()
+
+testHt <- function(nMin, nMax, step, nSSU){
+  for (n in seq(nMin,nMax,step)){
+    samplesize <- c(samplesize, n)
+    sample <- sampleExamplePopulation(n, nSSU)
+    estimates <- c(estimates, stage1HTtotal(sample)[1])
+    se <- c(se, sqrt(diag(stage1HTvariance(sample)))[1])
+  }
+  
+  performance <- data.table::data.table(samplesize=samplesize, estimate=estimates, se=se, lower=estimates - se, upper=estimates + se)
+  
+  pl <- ggplot2::ggplot(performance) +
+    ggplot2::geom_point(ggplot2::aes(x=samplesize, y=estimate)) +
+    ggplot2::geom_errorbar(ggplot2::aes(x=samplesize, ymin=lower, ymax=upper)) +
+    ggplot2::ylim(0,2*max(total[1])) +
+    ggplot2::geom_hline(yintercept = total[1], color="red") +
+    ggplot2::ylab("estimate +/- SD") +
+    ggplot2::xlab("PSU sample size")
+  pl
+}
+testHt(10,72,2,200)
+testHt(10,72,2,2)
+```
+
+
+## Hurvitz-Hansen estimation design: vessel, operation
+
+## Hurvitz-Hansen estimation design: vessel, operation
