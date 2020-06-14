@@ -14,3 +14,7 @@ expect_true(all(vecInc>0))
 expect_true(all(vecInc<1))
 vecSel <- poissonSelectionProbability(vecInc, 300)
 expect_true(all(abs(vecSel - c(.0005,0.0001)) < 1e-15))
+
+vecPairInc <- poissonJointInclusionProbabilityMatrix(c(.0005,0.0001))
+expect_equal(vecPairInc[1,2], vecPairInc[2,1])
+expect_true(all(is.na(diag(vecPairInc))))

@@ -61,7 +61,7 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
 #' @param replacement logical() vector corresponding to 'hierarchy', indicating whether the corresponding sampling units should be resampled with replacement
 #' @param popSize character() vector corresponding to 'hierarchy', indicating columns for population sizes, NAs signify that the number of samples that is available in 'samples' should be considered to be the population.
 #' @param prefix character() a string to prefix used to rename sampling units in resampled data
-#' @return resampled data, with sampling units renamed
+#' @return resampled data, with sampling units renamed. Samples are sorted by the order of selection at each level in the hiearchy (first row is the sample first selected)
 #' @examples
 #'  # The data set contains SSUs where no replicates where sampled
 #'  data(NSSH2019)
@@ -199,7 +199,7 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
       cols <- names(uSamples)[names(uSamples) != currentStage]
       rs <- resample(uSamples[,cols], restStages, restN, restRepl, restPop, newprefix)
       rs[[currentStage]] <- newname
-      result <- rbind(rs, result)
+      result <- rbind(result, rs)
 
     }
   }

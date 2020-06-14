@@ -22,6 +22,17 @@
 #' @export
 sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::examplePopulation, PSU="vesselId", SSU="opid"){
 
+  if (!data.table::is.data.table(population)){
+    stop("population must be a data table.")
+  }
+
+  newcols <- c("Npsu", "Nssu", "nPSU", "nSSU", "ipPSU", "spPSU", "ipSSU", "spSSU")
+  if (any(newcols %in% names(population))){
+    existing <- newcols[newcols %in% names(population)]
+    stop(paste("The following columns alread exisits in data table 'population':", paste(existing, collapse=",")))
+  }
+
+
   #annotate total PSUs and SSUs
   psuList <- list(population[[PSU]])
   names(psuList) <- PSU
@@ -48,3 +59,4 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 
   return(sample)
 }
+

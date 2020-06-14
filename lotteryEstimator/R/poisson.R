@@ -45,3 +45,13 @@ poissonSelectionProbability <- function(inclusionProbability, sampleSize){
   return(1-(1-inclusionProbability)**(1/sampleSize))
 }
 
+#' Poission joint inclusion probability
+#' @description calculates the pariwise joint inclusion probability for Poisson sampling, based on respective inclusion probabilities
+#' @param inclusionProbabilities inclusion probabilities for a sample
+#' @return the pairwise joint inclusion probability matrix
+#' @export
+poissonJointInclusionProbabilityMatrix <- function(inclusionProbabilities){
+  coinc <- outer(inclusionProbabilities,inclusionProbabilities)
+  diag(coinc) <- NA
+  return(coinc)
+}

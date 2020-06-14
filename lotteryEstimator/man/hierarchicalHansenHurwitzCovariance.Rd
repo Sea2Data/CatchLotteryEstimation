@@ -19,7 +19,7 @@ hierarchicalHansenHurwitzCovariance(
 
 \item{subEstimator}{function, function for estimating totals for each sampled unit}
 
-\item{subCovarianceEstimator}{\code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit}
+\item{subCovarianceEstimator}{\code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit. If NULL the sampled units will be assumed to have no contribution to the covariance}
 
 \item{selectionProbabilities}{character() indentifying the columns in 'sample' with selection probabilites for the sampling units.}
 }

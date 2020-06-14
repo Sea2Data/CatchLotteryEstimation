@@ -27,7 +27,7 @@ resample(
 \item{prefix}{character() a string to prefix used to rename sampling units in resampled data}
 }
 \value{
-resampled data, with sampling units renamed
+resampled data, with sampling units renamed. Samples are sorted by the order of selection at each level in the hiearchy (first row is the sample first selected)
 }
 \description{
 Resamples data from hierarchically clustered data,

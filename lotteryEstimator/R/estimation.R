@@ -379,7 +379,7 @@ hierarchicalHansenHurwitzTotals <- function(sample, partitionId, subEstimator, s
 #' @param sample \code{\link[data.table]{data.table}} with sample data
 #' @param partitionId character() identifying the columns in 'sample' that identify the sampling units to estimate from
 #' @param subEstimator function, function for estimating totals for each sampled unit
-#' @param subCovarianceEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit
+#' @param subCovarianceEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit. If NULL the sampled units will be assumed to have no contribution to the covariance
 #' @param selectionProbabilities character() indentifying the columns in 'sample' with selection probabilites for the sampling units.
 #' @return numeric() estimate of total
 #' @examples
@@ -400,13 +400,18 @@ hierarchicalHansenHurwitzCovariance <- function(sample, partitionId, subEstimato
     sampleUnitData <- sample[sample[[partitionId]] == id,]
     sProb[[id]] <- sampleUnitData[[selectionProbabilities]][1]
     sampleTotals[[id]] <- subEstimator(sampleUnitData)
-    sampleCovariances[[id]] <- subCovarianceEstimator(sampleUnitData)
+    if (!is.null(subCovarianceEstimator)){
+      sampleCovariances[[id]] <- subCovarianceEstimator(sampleUnitData)
+    }
+  }
+  cov <- hansenHurwitzCovariance(sampleTotals, unlist(sProb))
+
+  if (!is.null(subCovarianceEstimator)){
+    intra <- hansenHurwitzIntra(sampleCovariances, unlist(sProb))
+    cov <- cov + intra
   }
 
-  intra <- hansenHurwitzIntra(sampleCovariances, unlist(sProb))
-  inter <- hansenHurwitzCovariance(sampleTotals, unlist(sProb))
-
-  return(intra + inter)
+  return(cov)
 
 }
 
@@ -442,7 +447,7 @@ hierarchicalHorvitzThompsonTotals <- function(sample, partitionId, subEstimator,
 #' @param sample \code{\link[data.table]{data.table}} with sample data
 #' @param partitionId character() identifying the columns in 'sample' that identify the sampling units to estimate from
 #' @param subEstimator function, function for estimating totals for each sampled unit
-#' @param subCovarianceEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit
+#' @param subCovarianceEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit. If NULL the sampled units will be assumed to have no contribution to the covariance
 #' @param inclusionProbabilities character() indentifying the columns in 'sample' with inclusion probabilites for the sampling units.
 #' @param coInclusionMatrix matrix() named matrix with co-inclusion probabilites, indexed with the values in the column identified by 'partitionId'.
 #' @return numeric() estimate of total
@@ -456,17 +461,23 @@ hierarchicalHorvitzThompsonCovariance <- function(sample, partitionId, subEstima
     sampleUnitData <- sample[sample[[partitionId]] == id,]
     iProb[[id]] <- sampleUnitData[[inclusionProbabilities]][1]
     sampleTotals[[id]] <- subEstimator(sampleUnitData)
-    sampleCovariances[[id]] <- subCovarianceEstimator(sampleUnitData)
+    if (!is.null(subCovarianceEstimator)){
+      sampleCovariances[[id]] <- subCovarianceEstimator(sampleUnitData)
+    }
   }
 
-  intra <- horvitzThompsonIntra(sampleCovariances, unlist(iProb))
-  inter <- horvitzThompsonCovariance(sampleTotals, unlist(iProb), coInclusionMatrix)
+  cov <- horvitzThompsonCovariance(sampleTotals, unlist(iProb), coInclusionMatrix)
 
-  if (length(intra) != length(inter)){
-    stop("Inter and Intra covariance have different length.")
+  if (!is.null(subCovarianceEstimator)){
+    intra <- horvitzThompsonIntra(sampleCovariances, unlist(iProb))
+
+    if (length(intra) != length(cov)){
+      stop("Inter and Intra covariance have different length.")
+    }
+    cov <- cov + intra
   }
 
-  return(intra + inter)
+  return(cov)
 
 }
 
