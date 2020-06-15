@@ -60,3 +60,56 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
   return(sample)
 }
 
+#' Check estimator
+#' @description checks an estimator against a know population by resampling
+#' @details The analysis is restricted to 2-stage sampling using \code{\link[lotteryEstimator]{sampleExamplePopulation}}. Parameters 'nPSU', 'nSSU', 'population', 'PSU' and 'SSU' are simply passed to this function.
+#' @param estimator function that takes a single parameter (the output from \code{\link[lotteryEstimator]{sampleExamplePopulation}}) and returns an estimate (vector or scalar).
+#' @param popParameter The value of the population parameter to compare the estimate to (vector or scalar)
+#' @param iterations the number of iterations to run
+#' @param nPSU parameter passed to \code{\link[lotteryEstimator]{sampleExamplePopulation}}
+#' @param nSSU parameter passed to \code{\link[lotteryEstimator]{sampleExamplePopulation}}
+#' @param population parameter passed to \code{\link[lotteryEstimator]{sampleExamplePopulation}}
+#' @param PSU parameter passed to \code{\link[lotteryEstimator]{sampleExamplePopulation}}
+#' @param SSU parameter passed to \code{\link[lotteryEstimator]{sampleExamplePopulation}}
+#' @return list with the following values (vector or scalar):
+#'  \describe{
+#'   \item{simulated.bias}{The difference between the arithmetric mean of estimates and 'popParameter'}
+#'   \item{simulated.relative.bias}{simulated.bias divided by 'popParameter'}
+#'   \item{mean.sq.error}{The mean squared error of estimates}
+#'  }
+#' @example
+#'  data(examplePopulation)
+#'
+#'  #total COD in example population
+#'  total <- sum(examplePopulation$wholeWeightKg[examplePopulation$speciesFAO=="COD"])
+#'
+#'  #Naive estimator treat clustered sampling as unclustered
+#'  est <- function(sample){mean(sample$wholeWeightKg[sample$speciesFAO=="COD"])*sum(examplePopulation$speciesFAO=="COD")}
+#'
+#'  #evaluate naive estimator
+#'  \dontrun{checkEstimatorsExamplePopulation(est, total, 100, 20, 1)}
+#'
+#'  #confirm that naive estimator is correct when entire population is sampled
+#'  checkEstimatorsExamplePopulation(est, total, 2, 72, 365)
+#'
+#' @export
+checkEstimatorsExamplePopulation <- function(estimator, popParameter, iterations, nPSU, nSSU, population=lotteryEstimator::examplePopulation, PSU="vesselId", SSU="opid"){
+
+  estimates <- list()
+  sq.error <- list()
+  stopifnot(iterations>0)
+  for (i in 1:iterations){
+    sample <- sampleExamplePopulation(nPSU, nSSU, population = population, PSU=PSU, SSU=SSU)
+    est <- estimator(sample)
+    diff <- est - popParameter
+    estimates[[i]] <- est
+    sq.error[[i]] <- diff*diff
+  }
+
+  result <- list()
+  result$simulated.bias <- (Reduce("+", estimates) / iterations ) - popParameter
+  result$simulated.relative.bias <- result$simulated.bias / popParameter
+  result$mean.sq.error <- (Reduce("+", sq.error) / iterations )
+
+  return(result)
+}

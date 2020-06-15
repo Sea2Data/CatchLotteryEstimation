@@ -107,34 +107,18 @@ stage1HTvariance <- function(sample){
 
 ```{r echo=F}
 total <- totalCatch(examplePopulation)
-samplesize <- c()
-estimates <- c()
-se <- c()
 
-testHt <- function(nMin, nMax, step, nSSU){
-  for (n in seq(nMin,nMax,step)){
-    samplesize <- c(samplesize, n)
-    sample <- sampleExamplePopulation(n, nSSU)
-    estimates <- c(estimates, stage1HTtotal(sample)[1])
-    se <- c(se, sqrt(diag(stage1HTvariance(sample)))[1])
-  }
-  
-  performance <- data.table::data.table(samplesize=samplesize, estimate=estimates, se=se, lower=estimates - se, upper=estimates + se)
-  
-  pl <- ggplot2::ggplot(performance) +
-    ggplot2::geom_point(ggplot2::aes(x=samplesize, y=estimate)) +
-    ggplot2::geom_errorbar(ggplot2::aes(x=samplesize, ymin=lower, ymax=upper)) +
-    ggplot2::ylim(0,2*max(total[1])) +
-    ggplot2::geom_hline(yintercept = total[1], color="red") +
-    ggplot2::ylab("estimate +/- SD") +
-    ggplot2::xlab("PSU sample size")
-  pl
-}
-testHt(10,72,2,200)
-testHt(10,72,2,2)
+checkEstAllSampled <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 2, 72, 365)
+
+checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 500, 20, 2)
+
+se <- function(x){sqrt(diag(stage1HTvariance(x)))}
+checkEstVar <- checkEstimatorsExamplePopulation(se, sqrt(checkEst$mean.sq.error), 500, 20, 2)
+
+
 ```
 
 
 ## Hurvitz-Hansen estimation design: vessel, operation
 
-## Hurvitz-Hansen estimation design: vessel, operation
+## Hurvitz-Hansen estimation design: spatiotemporal, operation
