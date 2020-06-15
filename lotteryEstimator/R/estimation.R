@@ -214,9 +214,9 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
   }
 
   for (i in 1:length(sampleTotals)){
-    for (j in 1:length(sampleTotals)){
+    for (j in i:length(sampleTotals)){
       if (i != j){
-        sumSamples <- sumSamples + (coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * outer(sampleTotals[[i]], sampleTotals[[j]]) / (coInclusionProbabilities[i,j] * inclusionProbabilities[i] * inclusionProbabilities[j])
+        sumSamples <- sumSamples + 2*(coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * outer(sampleTotals[[i]], sampleTotals[[j]]) / (coInclusionProbabilities[i,j] * inclusionProbabilities[i] * inclusionProbabilities[j])
       }
     }
   }
