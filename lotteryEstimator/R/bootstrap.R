@@ -44,6 +44,83 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
 }
 
 
+#' Implementation split in two functions to avoid checks on recursive calls
+#' @noRd
+resampleWoChecks <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), replacement=rep(T, length(hierarchy)), popSize=rep(NA, length(hierarchy)), prefix=""){
+
+  currentStage <- hierarchy[1]
+  repl <- replacement[1]
+  nSamp <- nSamples[1]
+  pop <- popSize[1]
+  if (length(hierarchy)>1){
+    restStages <- hierarchy[2:length(hierarchy)]
+    restRepl <- replacement[2:length(replacement)]
+    restN <- nSamples[2:length(replacement)]
+    restPop <- popSize[2:length(popSize)]
+  }
+  else{
+    restStages <- NULL
+    restRepl <- NULL
+    restN <- NULL
+    restPop <- NULL
+  }
+
+  result <- NULL
+
+  #resample this stage
+  availableUnits <- unique(samples[[currentStage]])
+
+  N <- length(availableUnits)
+  if (!is.na(pop)){
+    N <- samples[[pop]][[1]]
+  }
+
+  n <- length(availableUnits)
+  if (!is.na(nSamp)){
+    n <- samples[[nSamp]][[1]]
+  }
+
+  selectedUnits <- availableUnits[sampleIndecies(n, length(availableUnits), repl, N)]
+
+  #this stage is the ultimate sampling stage
+  if (is.null(restStages)){
+
+    indecies <- c()
+    newnames <- c()
+    for (i in 1:length(selectedUnits)){
+      u <- selectedUnits[i]
+      uSamples <- (1:nrow(samples))[samples[[currentStage]]==u]
+
+      newnames <- c(newnames, rep(paste(prefix,currentStage,":",u,"#",i,sep=""), length(uSamples)))
+      indecies <- c(indecies, uSamples)
+    }
+    result <- samples[indecies,]
+    result[[currentStage]] <- newnames
+  }
+  # resample next stage
+  else{
+
+    data.table::setkeyv(samples, currentStage)
+
+    for (i in 1:length(selectedUnits)){
+
+      u <- selectedUnits[i]
+
+      newname <- paste(prefix,currentStage,":",u,"#",i,sep="")
+      newprefix <- paste(newname,"/", sep="")
+
+      cols <- names(samples)[names(samples) != currentStage]
+      rs <- resampleWoChecks(samples[list(u),..cols], restStages, restN, restRepl, restPop, newprefix)
+      rs[[currentStage]] <- newname
+      result <- rbind(result, rs)
+
+    }
+  }
+
+  return(result)
+
+}
+
 #' resample data
 #' @description
 #'  Resamples data from hierarchically clustered data,
@@ -104,7 +181,14 @@ sampleIndecies <- function(n, maxindex, replacement=T, popsize=NA){
 #'  sum(rs$age) == sum(NSSH2019$age)
 #'
 #' @export
+#' @import data.table
 resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), replacement=rep(T, length(hierarchy)), popSize=rep(NA, length(hierarchy)), prefix=""){
+
+
+  if(!data.table::is.data.table(samples)){
+    warning("Coercing 'samples' to data.table")
+    samples <- data.table::as.data.table(samples)
+  }
 
   #
   # wrap checks in outer functions if needed for performance (due to recursive call and re-checking)
@@ -138,73 +222,8 @@ resample <- function(samples, hierarchy, nSamples=rep(NA, length(hierarchy)), re
     stop("'hierarchy' must be specified")
   }
 
-  currentStage <- hierarchy[1]
-  repl <- replacement[1]
-  nSamp <- nSamples[1]
-  pop <- popSize[1]
-  if (length(hierarchy)>1){
-    restStages <- hierarchy[2:length(hierarchy)]
-    restRepl <- replacement[2:length(replacement)]
-    restN <- nSamples[2:length(replacement)]
-    restPop <- popSize[2:length(popSize)]
-  }
-  else{
-    restStages <- NULL
-    restRepl <- NULL
-    restN <- NULL
-    restPop <- NULL
-  }
+  return(resampleWoChecks(samples, hierarchy, nSamples, replacement, popSize, prefix))
 
-  result <- NULL
-
-  #resample this stage
-  availableUnits <- unique(samples[[currentStage]])
-
-  N <- length(availableUnits)
-  if (!is.na(pop)){
-    N <- samples[[pop]][[1]]
-  }
-
-  n <- length(availableUnits)
-  if (!is.na(nSamp)){
-    n <- samples[[nSamp]][[1]]
-  }
-
-  selectedUnits <- availableUnits[sampleIndecies(n, length(availableUnits), repl, N)]
-
-  #this stage is the ultimate sampling stage
-  if (is.null(restStages)){
-
-    indecies <- c()
-    newnames <- c()
-    for (i in 1:length(selectedUnits)){
-      u <- selectedUnits[i]
-      uSamples <- (1:nrow(samples))[samples[[currentStage]]==u]
-
-      newnames <- c(newnames, rep(paste(prefix,currentStage,":",u,"#",i,sep=""), length(uSamples)))
-      indecies <- c(indecies, uSamples)
-    }
-    result <- samples[indecies,]
-    result[[currentStage]] <- newnames
-  }
-  # resample next stage
-  else{
-    for (i in 1:length(selectedUnits)){
-      u <- selectedUnits[i]
-      uSamples <- samples[samples[[currentStage]]==u,]
-
-      newname <- paste(prefix,currentStage,":",u,"#",i,sep="")
-      newprefix <- paste(newname,"/", sep="")
-
-      cols <- names(uSamples)[names(uSamples) != currentStage]
-      rs <- resample(uSamples[,cols], restStages, restN, restRepl, restPop, newprefix)
-      rs[[currentStage]] <- newname
-      result <- rbind(result, rs)
-
-    }
-  }
-
-  return(result)
 }
 
 #' Bootstrap estimate
