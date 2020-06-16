@@ -53,7 +53,9 @@ The analysis is restricted to 2-stage sampling using \code{\link[lotteryEstimato
  total <- sum(examplePopulation$wholeWeightKg[examplePopulation$speciesFAO=="COD"])
 
  #Naive estimator treat clustered sampling as unclustered
- est <- function(sample){mean(sample$wholeWeightKg[sample$speciesFAO=="COD"])*sum(examplePopulation$speciesFAO=="COD")}
+ est <- function(sample){
+    mean(sample$wholeWeightKg[sample$speciesFAO=="COD"])*
+     sum(examplePopulation$speciesFAO=="COD")}
 
  #evaluate naive estimator
  \dontrun{checkEstimatorsExamplePopulation(est, total, 1000, 20, 1)}
