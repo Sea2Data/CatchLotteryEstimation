@@ -34,9 +34,7 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 
 
   #annotate total PSUs and SSUs
-  psuList <- list(population[[PSU]])
-  names(psuList) <- PSU
-  ssuTotal <- stats::aggregate(list(Nssu=population[[SSU]]), by=psuList, FUN=function(x){length(unique(x))})
+  ssuTotal <- population[,.(Nssu=length(unique(get(SSU)))), by=PSU]
 
   population <- merge(population, ssuTotal)
   population$Npsu <- length(unique(population[[PSU]]))
@@ -77,7 +75,7 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 #'   \item{simulated.relative.bias}{simulated.bias divided by 'popParameter'}
 #'   \item{mean.sq.error}{The mean squared error of estimates}
 #'  }
-#' @example
+#' @examples
 #'  data(examplePopulation)
 #'
 #'  #total COD in example population
@@ -87,7 +85,7 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 #'  est <- function(sample){mean(sample$wholeWeightKg[sample$speciesFAO=="COD"])*sum(examplePopulation$speciesFAO=="COD")}
 #'
 #'  #evaluate naive estimator
-#'  \dontrun{checkEstimatorsExamplePopulation(est, total, 100, 20, 1)}
+#'  \dontrun{checkEstimatorsExamplePopulation(est, total, 1000, 20, 1)}
 #'
 #'  #confirm that naive estimator is correct when entire population is sampled
 #'  checkEstimatorsExamplePopulation(est, total, 2, 72, 365)
@@ -98,6 +96,7 @@ checkEstimatorsExamplePopulation <- function(estimator, popParameter, iterations
   estimates <- list()
   sq.error <- list()
   stopifnot(iterations>0)
+
   for (i in 1:iterations){
     sample <- sampleExamplePopulation(nPSU, nSSU, population = population, PSU=PSU, SSU=SSU)
     est <- estimator(sample)
