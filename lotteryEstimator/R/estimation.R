@@ -430,8 +430,11 @@ hierarchicalHansenHurwitzCovariance <- function(sample, partitionId, subEstimato
 hierarchicalHorvitzThompsonTotals <- function(sample, partitionId, subEstimator, inclusionProbabilities){
   sampleTotals <- list()
   iProb <- list()
+
+  data.table::setkeyv(sample, partitionId)
+
   for (id in unique(sample[[partitionId]])){
-    sampleUnitData <- sample[sample[[partitionId]] == id,]
+    sampleUnitData <- sample[list(id)]
     iProb[[id]] <- sampleUnitData[[inclusionProbabilities]][1]
     sampleTotals[[id]] <- subEstimator(sampleUnitData)
   }

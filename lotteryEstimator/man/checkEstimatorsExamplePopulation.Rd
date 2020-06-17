@@ -35,13 +35,14 @@ checkEstimatorsExamplePopulation(
 \value{
 list with the following values (vector or scalar):
 \describe{
+\item{iterations}{The number of estimations run}
 \item{simulated.bias}{The difference between the arithmetric mean of estimates and 'popParameter'}
 \item{simulated.relative.bias}{simulated.bias divided by 'popParameter'}
 \item{mean.sq.error}{The mean squared error of estimates}
 }
 }
 \description{
-checks an estimator against a know population by resampling
+checks an estimator against a know population by repeated sampling and estmation
 }
 \details{
 The analysis is restricted to 2-stage sampling using \code{\link[lotteryEstimator]{sampleExamplePopulation}}. Parameters 'nPSU', 'nSSU', 'population', 'PSU' and 'SSU' are simply passed to this function.

@@ -59,7 +59,7 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 }
 
 #' Check estimator
-#' @description checks an estimator against a know population by resampling
+#' @description checks an estimator against a know population by repeated sampling and estmation
 #' @details The analysis is restricted to 2-stage sampling using \code{\link[lotteryEstimator]{sampleExamplePopulation}}. Parameters 'nPSU', 'nSSU', 'population', 'PSU' and 'SSU' are simply passed to this function.
 #' @param estimator function that takes a single parameter (the output from \code{\link[lotteryEstimator]{sampleExamplePopulation}}) and returns an estimate (vector or scalar).
 #' @param popParameter The value of the population parameter to compare the estimate to (vector or scalar)
@@ -71,6 +71,7 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 #' @param SSU parameter passed to \code{\link[lotteryEstimator]{sampleExamplePopulation}}
 #' @return list with the following values (vector or scalar):
 #'  \describe{
+#'   \item{iterations}{The number of estimations run}
 #'   \item{simulated.bias}{The difference between the arithmetric mean of estimates and 'popParameter'}
 #'   \item{simulated.relative.bias}{simulated.bias divided by 'popParameter'}
 #'   \item{mean.sq.error}{The mean squared error of estimates}
@@ -108,6 +109,7 @@ checkEstimatorsExamplePopulation <- function(estimator, popParameter, iterations
   }
 
   result <- list()
+  result$iterations <- iterations
   result$simulated.bias <- (Reduce("+", estimates) / iterations ) - popParameter
   result$simulated.relative.bias <- result$simulated.bias / popParameter
   result$mean.sq.error <- (Reduce("+", sq.error) / iterations )
