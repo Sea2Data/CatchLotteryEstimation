@@ -108,16 +108,28 @@ stage1HTvariance <- function(sample){
 ```{r echo=F}
 total <- totalCatch(examplePopulation)
 
+stop("Bumb iterations to 1000 for report")
+
 checkEstAllSampled <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 2, 72, 365)
 
-checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 500, 20, 2)
+checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 50, 20, 2)
 
 se <- function(x){sqrt(diag(stage1HTvariance(x)))}
-checkEstVar <- checkEstimatorsExamplePopulation(se, sqrt(checkEst$mean.sq.error), 500, 20, 2)
+checkEstVar <- checkEstimatorsExamplePopulation(se, sqrt(checkEst$mean.sq.error), 50, 20, 2)
 
 
 ```
 
+
+```{r}
+
+stop("Bumb iterations to 1000 for report")
+total <- totalCatch(examplePopulation)
+checkEstLowPSUlowSSU <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 50, 10, 2)
+checkEstLowPSUhighSSU <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 50, 10, 20)
+checkEstHighPSUlowSSU <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 50, 65, 2)
+checkEstHighPSUhighSSU <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 50, 65, 20)
+```
 
 ## Hurvitz-Hansen estimation design: vessel, operation
 
