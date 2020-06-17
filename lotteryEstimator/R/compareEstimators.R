@@ -74,7 +74,8 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 #'   \item{iterations}{The number of estimations run}
 #'   \item{simulated.bias}{The difference between the arithmetric mean of estimates and 'popParameter'}
 #'   \item{simulated.relative.bias}{simulated.bias divided by 'popParameter'}
-#'   \item{mean.sq.error}{The mean squared error of estimates}
+#'   \item{mean.sq.error}{The mean squared error of estimates (MSE)}
+#'   \item{root.mean.sq.error}{The square root of the mean squared error of estimates (RMSE)}
 #'  }
 #' @examples
 #'  data(examplePopulation)
@@ -113,6 +114,7 @@ checkEstimatorsExamplePopulation <- function(estimator, popParameter, iterations
   result$simulated.bias <- (Reduce("+", estimates) / iterations ) - popParameter
   result$simulated.relative.bias <- result$simulated.bias / popParameter
   result$mean.sq.error <- (Reduce("+", sq.error) / iterations )
+  result$root.mean.sq.error <- sqrt(result$mean.sq.error)
 
   return(result)
 }
