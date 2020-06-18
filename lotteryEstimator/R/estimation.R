@@ -13,7 +13,7 @@ hansenHurwitz <- function(sampleTotals, selectionProbabilities){
     stop("selectionProbabilities does not correspond to the listed sample totals")
   }
   if (sum(selectionProbabilities) > 1 | sum(selectionProbabilities) <= 0){
-    stop("sum of selectionProbabilities must be in [0,1>")
+    stop("sum of selectionProbabilities must be in [0,1>, got: ", sum(selectionProbabilities))
   }
   if (any(selectionProbabilities > 1) | any(selectionProbabilities <= 0)){
     stop("all selectionProbabilities must be in [0,1>")

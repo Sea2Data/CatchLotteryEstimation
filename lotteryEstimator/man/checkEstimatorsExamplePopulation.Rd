@@ -38,7 +38,8 @@ list with the following values (vector or scalar):
 \item{iterations}{The number of estimations run}
 \item{simulated.bias}{The difference between the arithmetric mean of estimates and 'popParameter'}
 \item{simulated.relative.bias}{simulated.bias divided by 'popParameter'}
-\item{mean.sq.error}{The mean squared error of estimates}
+\item{mean.sq.error}{The mean squared error of estimates (MSE)}
+\item{root.mean.sq.error}{The square root of the mean squared error of estimates (RMSE)}
 }
 }
 \description{

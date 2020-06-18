@@ -97,7 +97,7 @@ stage1HTvariance <- function(sample){
   hierarchicalHorvitzThompsonCovariance(sample, 
                                         "vesselId", 
                                         stage2HTtotal, 
-                                        stage2HTvariance, # each sample is one observation, so the covariance is 0
+                                        stage2HTvariance,
                                         "ipPSU", 
                                         jointInc)
   
@@ -137,4 +137,69 @@ sqrt(checkEstHighPSUlowSSU$mean.sq.error) / sqrt(checkEstHighPSUhighSSU$mean.sq.
 
 ## Hurvitz-Hansen estimation design: vessel, operation
 
+```{r}
+stage1HHtotal <- function(sample){
+  sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+  hierarchicalHansenHurwitzTotals(sample, "vesselId", stage2HTtotal, "spPSU")}
+```
+
+```{r}
+stage1HHvariance <- function(sample){
+sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+hierarchicalHansenHurwitzCovariance(sample, 
+                                        "vesselId", 
+                                        stage2HTtotal, 
+                                        NULL, # each sample is one observation, so the covariance is 0
+                                        "spPSU")
+}
+se <- function(x){sqrt(diag(stage1HHvariance(x)))}
+```
+
+```{r echo=F}
+total <- totalCatch(examplePopulation)
+
+stop("Bumb iterations to 1000 for report")
+
+checkEstAllSampled <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 2, 72, 365)
+
+checkEstSmallSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 10, 2)
+checkEstLargeSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 50, 2)
+
+checkEstVarSmallSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstSmallSample$mean.sq.error), 50, 10, 2)
+checkEstVarLargeSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstLargeSample$mean.sq.error), 50, 50, 2)
+
+```
+
+
 ## Hurvitz-Hansen estimation design: spatiotemporal, operation
+
+```{r}
+stage1HHtotal <- function(sample){
+  sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+  hierarchicalHansenHurwitzTotals(sample, "spacetimeid", stage2HTtotal, "spPSU")}
+```
+
+```{r}
+stage1HHvariance <- function(sample){
+sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+hierarchicalHansenHurwitzCovariance(sample, 
+                                        "spacetimeid", 
+                                        stage2HTtotal, 
+                                        NULL, # each sample is one observation, so the covariance is 0
+                                        "spPSU")
+}
+se <- function(x){sqrt(diag(stage1HHvariance(x)))}
+```
+
+```{r echo=F}
+total <- totalCatch(examplePopulation)
+
+stop("Bumb iterations to 1000 for report")
+
+checkEst <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 120, 2, PSU="spacetimeid")
+
+
+checkEstVar <- checkEstimatorsExamplePopulation(se, checkEst$root.mean.sq.error, 50, 120, 2, PSU="spacetimeid")
+
+
+```
