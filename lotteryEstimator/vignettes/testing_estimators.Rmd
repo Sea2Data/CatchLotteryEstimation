@@ -1,0 +1,272 @@
+---
+title: "Testing estimators"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Testing estimators}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Correctness tests
+
+It is notouriously difficult to assure that scientific software correctly implements a specification. Very commonly such software is implemented to calculate values that are not know from other sources, and correctness can only be cheked very inidrectly. Actual verification against semi-formal specifications such as mathematical equations are not genereally possible, and we almost always have to resort to testing for known invariants deduced from model specifications. For example we may know from model formulations that a correct implementation can never yield a value for paramter a that is lower than parameter b and this can be tested. We also continously test scientific software against our expections for the unkowns it is supposed to calculate, but this is hardly an assuring approach to ensuring software correctness. For the case of estimation routines the situation is somewhat better. The point of estimation is to make inference about a population from samples drawn from that population. Sufficiently general formulations of estimation routines may be tested against other populations than the ones that are of interest, and the relevant population parameters may therefore be known. Such populations may even be entirely synthetic. This is not close to formal verification, and we should expect bugs to sneak in even with such a testing regime. Particularly because such testing is necessarily statistical in nature, the particularities of the populations tested may or may not provide errors large enough to reveal implementation errors. This is however the most direct form of correctness testing I know for scientific software, and I will in this vignette present analysis that corraborates the correctness of some key functions in this package. Rebuilding this vignette will serve to test that these functions still work correctly when changes are made to the source code. Further this vignette serves as a reciepe for writing similar correctness tests for other estimators.
+
+The kind of correctness testing included here should be clearly distinguished from the so-called unit-tests acompanying this package. Unit-tests are in place primarily to ensure that software work as designed. That it produces correctly formatted output for the input formats it is specified for, that it handles user-errors with proper error-messages and such things. They are run frequently during package development and reporting of test results is completely automatic, so slow running tests or tests that require manual inspection are not permissable. Therefore tests of correctness can be incorporated in unit tests only to a very limited extent.
+
+```{r setup}
+library(lotteryEstimator)
+```
+
+## Example population
+
+In order to facilitate correctness testinf this package contains an example population (data(longlinerPopulation)). This is an artifical population of catches in a fishing fleet, with realistic catch weights for a mixture of species. Explanatory text for the columns can be found in the data documentation (?longlinerPopulation). Briefly, statistics of the columns 'wholeWeightKg', 'soaktimeHours' or 'hookCount' may serve as population parameters, and sampling may be clustered by the columns 'vesselId', 'timeid', 'spaceid', 'spacetimeid' or 'opid'. The column 'gearFAO' may serve as a natural stratification variable.
+
+```{r}
+str(longlinerPopulation)
+```
+
+This package also contain a function, 'sampleExamplePopulation', for performing two-stage clustered sampling from this example population (or another similarlt formatted population). This function performs simple random sampling without replacement at both stages of sampling and annotates the sample with columns specifying selection and inclusion probabilites. The default settings performs selection with 'vesselId' as primary sampling unit (PSU) and 'opid' as secondary sampling unit (SSU), and only the sample sizes at each stage need to be specified. At the secondary sampling level the specified number of samples is selected, or all the available samples, depending on which is smaller.
+
+```{r}
+sample <- sampleExamplePopulation(10, 10)
+str(sample)
+```
+
+## sample statistics
+
+For the purposes of these tests we will want to estimate the toal catch of some select species, a quantity this known for each fishing operation ('opid'). In order to extract the sample statistic from the data format above, I define the function 'totalCatch':
+
+```{r}
+totalCatch <- function(sample, species=c("COD", "HAD")){
+  catches <- c()
+  for (s in species){
+    if (s %in% sample$speciesFAO){
+      catches <- c(catches, sum(sample$wholeWeightKg[sample$speciesFAO==s]))
+    }
+    else{
+      catches <- c(catches, 0)
+    }
+  }
+  names(catches) <- species
+  return(catches)
+}
+
+```
+
+Note that this function is defined so that it can both serve to calculate total catch in a fishing operation (if only data for one 'opid' is provied) or for the entire population (if 'longlinerPopulation' is provided).
+
+## Horwitz-Thompson estimation design: vessel, operation
+
+We will use this example population to test the functions for Horwitz-Thompson estimation 'hierarchicalHorvitzThompsonTotals' and 'hierarchicalHorvitzThompsonCovariance'. Proceeding upward from the bottom of the selection hierarchy, we then define an estimator for a sample of fishing operations ('opid'):
+
+```{r}
+stage2HTtotal <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "opid", totalCatch, "ipSSU")}
+```
+
+which states that the samples should be differentiated by the column 'opid', and that the sample statistic for each can be found by passing the relevant data to the function 'totalCatch', and that inclusion probabilties for each fishing operation can be found in the column 'ipSSU'. Similarly we define the estimator for the variance of 'stage2HTtotal':
+
+```{r}
+stage2HTvariance <- function(sample){
+  
+  # get pairwise joint inclusion probabilities for SRSWOR
+  stopifnot(length(unique(sample$nSSU)) == 1)
+  stopifnot(length(unique(sample$Nssu)) == 1)
+  n <- sample$nSSU[1]
+  N <- sample$Nssu[1]
+  
+  jointInc <- srsworJointInclusionProbabilityMatrix(n,N)
+  rownames(jointInc) <- unique(sample$opid)
+  colnames(jointInc) <- unique(sample$opid)
+  
+  hierarchicalHorvitzThompsonCovariance(sample, 
+                                        "opid", 
+                                        totalCatch, 
+                                        NULL, #there are no intra 'opid' covariances of total cacth in one operation
+                                        "ipSSU", 
+                                        jointInc)
+  
+  }
+```
+
+For Horwitz-Thompson estimation we need the pairwise joint inclusion probabilities which are calculated in the first lines of this function. The subsequent call to 'hierarchicalHorvitzThompsonCovariance' specifies again that samples are distinguised by 'opid', that 'totalCatch' provides the estimates for each sample and that inclusion probabilites are found in the column 'ipSSU'. Note that we provide no function for calculating the variance within a fishing operation, as totalCatch returns a known qunatity. Proceeding further up the hiearchy we define the estimator for the population parameters:
+
+```{r}
+stage1HTtotal <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "vesselId", stage2HTtotal, "ipPSU")}
+```
+
+and the estimator of its variance and of its standard error:
+
+```{r}
+stage1HTvariance <- function(sample){
+  
+  # get pairwise joint inclusion probabilities for SRSWOR
+  stopifnot(length(unique(sample$nPSU)) == 1)
+  stopifnot(length(unique(sample$Npsu)) == 1)
+  n <- sample$nPSU[1]
+  N <- sample$Npsu[1]
+  
+  jointInc <- srsworJointInclusionProbabilityMatrix(n,N)
+  rownames(jointInc) <- unique(sample$vesselId)
+  colnames(jointInc) <- unique(sample$vesselId)
+  
+  hierarchicalHorvitzThompsonCovariance(sample, 
+                                        "vesselId", 
+                                        stage2HTtotal, 
+                                        stage2HTvariance,
+                                        "ipPSU", 
+                                        jointInc)
+  
+}
+stage1HTse <- function(sample){sqrt(diag(stage1HTvariance(sample)))}
+```
+
+Note that stage1HTvariance returns a variance-covariance matrix, so the variances are found along the diagonal, and the estimated standard error is the square root of the diagonal elements.
+
+We can now draw samples from a known population and estimates with the functions for hierarchical Horwitz-Thompson estimation. We should expect 'stage1HTtotal' to implement an unbiased estimator of total catch, and 'stage1HTse' to be an unbiased estimator if its standard error. We can check this expectation against repeated sampling using the function 'checkEstimatorsExamplePopulation' from this package. 'checkEstimatorsExamplePopulation' performs repeated sampling using 'sampleExamplePopulation' and calculates estimates for each sample drawn, and returns performance statistics. 
+
+First we can perform a simple test to check that the estimator behaves as expected when the entire population is sampled. This should give a bias of zero for every sample drawn, so we perform only two iterations:
+```{r}
+populationTotal <- totalCatch(longlinerPopulation)
+checkEstAllSampled <- checkEstimatorsExamplePopulation(stage1HTtotal, populationTotal, 2, 72, 400)
+print(checkEstAllSampled)
+```
+Confirm that the simulated bias is zero.
+
+No vessel in the 'longlinerPopulation' has actually performed 400 fishing operations, the SSU sample size is just set that high to ensure that all available SSUs are sampled.
+
+The root mean squared error (RMSE) of 'stage1HTtotal' from the simulation should for sufficiently many iterations converge to zero, and can be used to test correctness of the standard error estimate, 'stage1HTse'. For these particular sample selections, the convergence should again be immidiate:
+
+```{r}
+checkEstAllSampledVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEstAllSampled$root.mean.sq.error, 2, 72, 400)
+print(checkEstAllSampledVar)
+```
+Confirm that the simulated bias is zero.
+
+A more realistic example illustrates the challenge in interpreting performance statistics for simulated sampling. Extremely long simulations must be performed for the simulated.bias of an estimator get close to the machine precision of number representation. We will have to set some less strict acceptance criteria. I will somewhat arbitrarily be content with a simulated relative bias that is zero rounded of to the fifth digit, but this criteria should be kept in mind when considering whether correctness is sufficiently assured for application of the same functions to other populations. Testing the estimator for correctness when 5000 iterations are run, selecting 20 vessels and up to 2 fishing operations from each:
+
+```{r echo=F}
+total <- totalCatch(longlinerPopulation)
+
+stop("Bumb iterations to 5000 for report")
+
+timingEst <- system.time(
+  checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 1000, 20, 2)
+)
+
+timingEstVar <- system.time(
+  checkEstVar <- checkEstimatorsExamplePopulation(se, checkEst$root.mean.sq.error, 1000, 20, 2)
+)
+
+print(timingEst)
+print(checkEst$simulated.relative.bias)
+print(timingEstVar)
+print(checkEstVar$simulated.relative.bias)
+
+```
+Confirm that simulated relative bias is zero when rounded to the fifth digit.
+
+Under some very general conditions, when a small fraction of the population is sampled, the variance of the estimator should not be very sensitive to the number of samples seleted at the secondary sampling level. Or stated differently, the standard error should be more sensitive to the number of samples at the secondary sampling level, when a larger fraction of the population is sampled. For a fixed sampling capacity it is therefore generally better to distribute sampling effort among more PSUs, than to sample more SSUs for each PSU. Consider two sampling designs where one samples up to two SSUs pr PSU, and another samples up to for SSUs pr PSU. When the total number of SSUs sampled across all PSUs are constant we would expect the difference of the standard errors to become smaller as this total increases. We can test that the stage1HTtotal behaves as expected in this regard.
+
+
+```{r}
+
+stop("Bumb iterations and check for report")
+total <- totalCatch(longlinerPopulation)
+
+PSUsampleSize <- c()
+estimate2SSU <- c()
+estimate4SSU <- c()
+
+for (n in seq(24,60,12)){
+  checkEstLowSSU <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 5000, n/2, 2)
+  checkEstHighSSU <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 5000, n/4, 4)
+  
+  PSUsampleSize <- c(PSUsampleSize, rep(n, length(checkEstLowSSU$root.mean.sq.error)))
+  estimate2SSU <- c(estimate2SSU, checkEstLowSSU$root.mean.sq.error)
+  estimate4SSU <- c(estimate4SSU, checkEstHighSSU$root.mean.sq.error)
+}
+species <- names(estimate4SSU)
+
+ggplot2::ggplot(data.table::data.table(PSUsampleSize=PSUsampleSize, difference=estimate4SSU-estimate2SSU, species=species)) +
+  ggplot2::geom_line(ggplot2::aes(x=PSUsampleSize, y=difference, color=species)) +
+  ggplot2::ylab("SE(4 pr PSU) - SE(2 pr PSU)") +
+  ggplot2::xlab("total SSU sample size")
+
+
+```
+
+## Hurvitz-Hansen estimation design: vessel, operation
+
+```{r}
+stage1HHtotal <- function(sample){
+  sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+  hierarchicalHansenHurwitzTotals(sample, "vesselId", stage2HTtotal, "spPSU")}
+```
+
+```{r}
+stage1HHvariance <- function(sample){
+sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+hierarchicalHansenHurwitzCovariance(sample, 
+                                        "vesselId", 
+                                        stage2HTtotal, 
+                                        NULL, # each sample is one observation, so the covariance is 0
+                                        "spPSU")
+}
+se <- function(x){sqrt(diag(stage1HHvariance(x)))}
+```
+
+```{r echo=F}
+total <- totalCatch(longlinerPopulation)
+
+stop("Bumb iterations to 1000 for report")
+
+checkEstAllSampled <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 2, 72, 365)
+
+checkEstSmallSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 10, 2)
+checkEstLargeSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 50, 2)
+
+checkEstVarSmallSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstSmallSample$mean.sq.error), 50, 10, 2)
+checkEstVarLargeSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstLargeSample$mean.sq.error), 50, 50, 2)
+
+```
+
+
+## Hurvitz-Hansen estimation design: spatiotemporal, operation
+
+```{r}
+stage1HHtotal <- function(sample){
+  sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+  hierarchicalHansenHurwitzTotals(sample, "spacetimeid", stage2HTtotal, "spPSU")}
+```
+
+```{r}
+stage1HHvariance <- function(sample){
+sample$spPSU <- 1 / sample$Npsu #assume SRSWR
+hierarchicalHansenHurwitzCovariance(sample, 
+                                        "spacetimeid", 
+                                        stage2HTtotal, 
+                                        NULL, # each sample is one observation, so the covariance is 0
+                                        "spPSU")
+}
+se <- function(x){sqrt(diag(stage1HHvariance(x)))}
+```
+
+```{r echo=F}
+total <- totalCatch(longlinerPopulation)
+
+stop("Bumb iterations to 1000 for report")
+
+checkEst <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 120, 2, PSU="spacetimeid")
+
+
+checkEstVar <- checkEstimatorsExamplePopulation(se, checkEst$root.mean.sq.error, 50, 120, 2, PSU="spacetimeid")
+
+
+```

@@ -7,7 +7,7 @@
 sampleExamplePopulation(
   nPSU,
   nSSU,
-  population = lotteryEstimator::examplePopulation,
+  population = lotteryEstimator::longlinerPopulation,
   PSU = "vesselId",
   SSU = "opid"
 )

@@ -6,4 +6,4 @@ expect_true(all(sample$nSSU <= sample$Nssu))
 
 
 sampleAll <- sampleExamplePopulation(72,365)
-expect_equal(nrow(examplePopulation),nrow(sampleAll))
+expect_equal(nrow(longlinerPopulation),nrow(sampleAll))

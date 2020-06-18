@@ -8,7 +8,7 @@
 #'
 #' @docType data
 #'
-#' @usage data(examplePopulation)
+#' @usage data(longlinerPopulation)
 #'
 #' @format \code{\link[data.table]{data.table}} one row for each measured fish and with columns:
 #'  \describe{
@@ -28,6 +28,6 @@
 #' @keywords datasets
 #'
 #' @examples
-#' data(examplePopulation)
+#' data(longlinerPopulation)
 #'
-"examplePopulation"
+"longlinerPopulation"

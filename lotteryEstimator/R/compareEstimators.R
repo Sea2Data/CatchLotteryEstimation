@@ -20,7 +20,7 @@
 #' @examples
 #'  sample <- sampleExamplePopulation(10,10)
 #' @export
-sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::examplePopulation, PSU="vesselId", SSU="opid"){
+sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::longlinerPopulation, PSU="vesselId", SSU="opid"){
 
   if (!data.table::is.data.table(population)){
     stop("population must be a data table.")
@@ -78,24 +78,24 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::exa
 #'   \item{root.mean.sq.error}{The square root of the mean squared error of estimates (RMSE)}
 #'  }
 #' @examples
-#'  data(examplePopulation)
+#'  data(longlinerPopulation)
 #'
 #'  #total COD in example population
-#'  total <- sum(examplePopulation$wholeWeightKg[examplePopulation$speciesFAO=="COD"])
+#'  total <- sum(longlinerPopulation$wholeWeightKg[longlinerPopulation$speciesFAO=="COD"])
 #'
 #'  #Naive estimator treat clustered sampling as unclustered
 #'  est <- function(sample){
 #'     mean(sample$wholeWeightKg[sample$speciesFAO=="COD"])*
-#'      sum(examplePopulation$speciesFAO=="COD")}
+#'      sum(longlinerPopulation$speciesFAO=="COD")}
 #'
 #'  #evaluate naive estimator
-#'  \dontrun{checkEstimatorsExamplePopulation(est, total, 1000, 20, 1)}
+#'  \dontrun{checkEstimatorslonglinerPopulation(est, total, 1000, 20, 1)}
 #'
 #'  #confirm that naive estimator is correct when entire population is sampled
-#'  checkEstimatorsExamplePopulation(est, total, 2, 72, 365)
+#'  checkEstimatorslonglinerPopulation(est, total, 2, 72, 365)
 #'
 #' @export
-checkEstimatorsExamplePopulation <- function(estimator, popParameter, iterations, nPSU, nSSU, population=lotteryEstimator::examplePopulation, PSU="vesselId", SSU="opid"){
+checkEstimatorsExamplePopulation <- function(estimator, popParameter, iterations, nPSU, nSSU, population=lotteryEstimator::longlinerPopulation, PSU="vesselId", SSU="opid"){
 
   estimates <- list()
   sq.error <- list()

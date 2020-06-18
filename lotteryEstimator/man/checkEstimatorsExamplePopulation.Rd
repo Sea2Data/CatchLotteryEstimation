@@ -10,7 +10,7 @@ checkEstimatorsExamplePopulation(
   iterations,
   nPSU,
   nSSU,
-  population = lotteryEstimator::examplePopulation,
+  population = lotteryEstimator::longlinerPopulation,
   PSU = "vesselId",
   SSU = "opid"
 )
@@ -49,20 +49,20 @@ checks an estimator against a know population by repeated sampling and estmation
 The analysis is restricted to 2-stage sampling using \code{\link[lotteryEstimator]{sampleExamplePopulation}}. Parameters 'nPSU', 'nSSU', 'population', 'PSU' and 'SSU' are simply passed to this function.
 }
 \examples{
- data(examplePopulation)
+ data(longlinerPopulation)
 
  #total COD in example population
- total <- sum(examplePopulation$wholeWeightKg[examplePopulation$speciesFAO=="COD"])
+ total <- sum(longlinerPopulation$wholeWeightKg[longlinerPopulation$speciesFAO=="COD"])
 
  #Naive estimator treat clustered sampling as unclustered
  est <- function(sample){
     mean(sample$wholeWeightKg[sample$speciesFAO=="COD"])*
-     sum(examplePopulation$speciesFAO=="COD")}
+     sum(longlinerPopulation$speciesFAO=="COD")}
 
  #evaluate naive estimator
- \dontrun{checkEstimatorsExamplePopulation(est, total, 1000, 20, 1)}
+ \dontrun{checkEstimatorslonglinerPopulation(est, total, 1000, 20, 1)}
 
  #confirm that naive estimator is correct when entire population is sampled
- checkEstimatorsExamplePopulation(est, total, 2, 72, 365)
+ checkEstimatorslonglinerPopulation(est, total, 2, 72, 365)
 
 }
