@@ -57,6 +57,7 @@ resampleWoChecks <- function(samples, hierarchy, nSamples=rep(NA, length(hierarc
     restRepl <- replacement[2:length(replacement)]
     restN <- nSamples[2:length(replacement)]
     restPop <- popSize[2:length(popSize)]
+    data.table::setkeyv(samples, currentStage)
   }
   else{
     restStages <- NULL
@@ -68,7 +69,7 @@ resampleWoChecks <- function(samples, hierarchy, nSamples=rep(NA, length(hierarc
   result <- NULL
 
   #resample this stage
-  availableUnits <- unique(samples[[currentStage]])
+  availableUnits <- samples[[currentStage]][!duplicated(samples[[currentStage]])]
 
   N <- length(availableUnits)
   if (!is.na(pop)){
@@ -100,8 +101,6 @@ resampleWoChecks <- function(samples, hierarchy, nSamples=rep(NA, length(hierarc
   # resample next stage
   else{
 
-    data.table::setkeyv(samples, currentStage)
-
     for (i in 1:length(selectedUnits)){
 
       u <- selectedUnits[i]
@@ -109,8 +108,7 @@ resampleWoChecks <- function(samples, hierarchy, nSamples=rep(NA, length(hierarc
       newname <- paste(prefix,currentStage,":",u,"#",i,sep="")
       newprefix <- paste(newname,"/", sep="")
 
-      cols <- names(samples)[names(samples) != currentStage]
-      rs <- resampleWoChecks(samples[list(u),..cols], restStages, restN, restRepl, restPop, newprefix)
+      rs <- resampleWoChecks(samples[list(u)], restStages, restN, restRepl, restPop, newprefix)
       rs[[currentStage]] <- newname
       result <- rbind(result, rs)
 
