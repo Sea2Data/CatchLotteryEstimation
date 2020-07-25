@@ -161,7 +161,7 @@ timingEst <- system.time(
 )
 
 timingEstVar <- system.time(
-  checkEstVar <- checkEstimatorsExamplePopulation(se, checkEst$root.mean.sq.error, 1000, 20, 2)
+  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 1000, 20, 2)
 )
 
 print(timingEst)
