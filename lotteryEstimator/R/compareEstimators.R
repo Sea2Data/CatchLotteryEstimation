@@ -6,7 +6,8 @@
 #' @param population \code{\link[data.table]{data.table}} with the entire popoulation to sample. The population must be organised in clusters for two stage sampling, identfied by 'PSU' and 'SSU'.
 #' @param PSU character() specifying the column in 'population' that identifies the primary sampling units
 #' @param SSU character() specifying the column in 'population' that identifies the secondary sampling units
-#' @return \code{\link[data.table]{data.table}} formatted as 'population' containing only the sampled elements, and the following additional columns:
+#' @param addSamplingProbs logical() whether sampling probabilites and population totals will be appended
+#' @return \code{\link[data.table]{data.table}} formatted as 'population' containing only the sampled elements. If addSamplingProbs is True, the following additional columns will be added:
 #'  \describe{
 #'   \item{Npsu}{total number of PSUs in the population}
 #'   \item{Nssu}{total number of SSUs within the given PSU in the population}
@@ -20,7 +21,7 @@
 #' @examples
 #'  sample <- sampleExamplePopulation(10,10)
 #' @export
-sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::longlinerPopulation, PSU="vesselId", SSU="opid"){
+sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::longlinerPopulation, PSU="vesselId", SSU="opid", addSamplingProbs=T){
 
   if (!data.table::is.data.table(population)){
     stop("population must be a data table.")
@@ -31,7 +32,6 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::lon
     existing <- newcols[newcols %in% names(population)]
     stop(paste("The following columns alread exisits in data table 'population':", paste(existing, collapse=",")))
   }
-
 
   #annotate total PSUs and SSUs
   ssuTotal <- population[,.(Nssu=length(unique(get(SSU)))), by=PSU]
@@ -49,11 +49,16 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::lon
 
   sample <- resample(population, hierarchy=c(PSU, SSU), nSamples=c("nPSU", "nSSU"), replacement=c(F,F))
 
-  PSUselectionOrder <- unlist(lapply(strsplit(sample[[PSU]], "#"), function(x){as.integer(x[2])}))
-  SSUselectionOrder <- unlist(lapply(strsplit(sample[[SSU]], "#"), function(x){as.integer(x[3])}))
+  PSUselectionOrder <- match(sample[[PSU]], sample[[PSU]][!duplicated(sample[[PSU]])])
+  SSUselectionOrder <- match(sample[[SSU]], sample[[SSU]][!duplicated(sample[[SSU]])])
+  SSUselectionOrder <- SSUselectionOrder - SSUselectionOrder[!duplicated(sample[[PSU]])][match(sample[[PSU]],sample[[PSU]][!duplicated(sample[[PSU]])])] + 1
 
   sample$spPSU <- 1 / (sample$Npsu - PSUselectionOrder + 1)
   sample$spSSU <- 1 / (sample$Nssu - SSUselectionOrder + 1)
+
+  if (!addSamplingProbs){
+    sample[,newcols] <- NULL
+  }
 
   return(sample)
 }
