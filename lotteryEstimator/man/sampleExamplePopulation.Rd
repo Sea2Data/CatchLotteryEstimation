@@ -9,7 +9,8 @@ sampleExamplePopulation(
   nSSU,
   population = lotteryEstimator::longlinerPopulation,
   PSU = "vesselId",
-  SSU = "opid"
+  SSU = "opid",
+  addSamplingProbs = T
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ sampleExamplePopulation(
 \item{PSU}{character() specifying the column in 'population' that identifies the primary sampling units}
 
 \item{SSU}{character() specifying the column in 'population' that identifies the secondary sampling units}
+
+\item{addSamplingProbs}{logical() whether sampling probabilites and population totals will be appended}
 }
 \value{
-\code{\link[data.table]{data.table}} formatted as 'population' containing only the sampled elements, and the following additional columns:
+\code{\link[data.table]{data.table}} formatted as 'population' containing only the sampled elements. If addSamplingProbs is True, the following additional columns will be added:
 \describe{
 \item{Npsu}{total number of PSUs in the population}
 \item{Nssu}{total number of SSUs within the given PSU in the population}
