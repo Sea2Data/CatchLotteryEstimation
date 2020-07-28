@@ -158,7 +158,6 @@ reducedPopulation <- sampleExamplePopulation(4,4,addSamplingProbs = F)
 Testing the estimator for correctness when 50000 iterations are run, selecting 3 vessels and up to 3 fishing operations from each:
 
 ```{r echo=F}
-
 total <- totalCatch(reducedPopulation)
 
 timingEst <- system.time(
@@ -166,7 +165,7 @@ timingEst <- system.time(
 )
 
 timingEstVar <- system.time(
-  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 50000, 3, 3)
+  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 50000, 3, 3, population = reducedPopulation)
 )
 
 timingEst
