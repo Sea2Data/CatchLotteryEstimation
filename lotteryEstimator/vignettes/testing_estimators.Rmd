@@ -149,35 +149,39 @@ print(checkEstAllSampledVar)
 ```
 Confirm that the simulated bias is zero.
 
-A more realistic example illustrates the challenge in interpreting performance statistics for simulated sampling. Extremely long simulations must be performed for the simulated.bias of an estimator get close to the machine precision of number representation. We will have to set some less strict acceptance criteria. I will somewhat arbitrarily be content with a simulated relative bias that is zero rounded of to the fifth digit, but this criteria should be kept in mind when considering whether correctness is sufficiently assured for application of the same functions to other populations. Testing the estimator for correctness when 5000 iterations are run, selecting 20 vessels and up to 2 fishing operations from each:
+A more realistic example illustrates the challenge in interpreting performance statistics for simulated sampling. Extremely long simulations must be performed for the simulated.bias of an estimator get close to the machine precision of number representation and we will have to set some less strict acceptance criteria. I will somewhat arbitrarily be content with a simulated relative bias that is zero rounded of to two digits, but this criteria should be kept in mind when considering whether correctness is sufficiently assured for application of the same functions to other populations. In order to reduce computation time I will also perform the test on a smaller population, using the function 'sampleExamplePopulation' to extract a subpopulation fo four vessels and up to four fishin operations from each:
+
+```{r}
+reducedPopulation <- sampleExamplePopulation(4,4,addSamplingProbs = F)
+```
+
+Testing the estimator for correctness when 50000 iterations are run, selecting 3 vessels and up to 3 fishing operations from each:
 
 ```{r echo=F}
-total <- totalCatch(longlinerPopulation)
 
-stop("Bumb iterations to 5000 for report")
+total <- totalCatch(reducedPopulation)
 
 timingEst <- system.time(
-  checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 1000, 20, 2)
+  checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 50000, 3, 3, population = reducedPopulation)
 )
 
 timingEstVar <- system.time(
-  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 1000, 20, 2)
+  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 50000, 3, 3)
 )
 
-print(timingEst)
-print(checkEst$simulated.relative.bias)
-print(timingEstVar)
-print(checkEstVar$simulated.relative.bias)
+timingEst
+checkEst$simulated.relative.bias
+timingEstVar
+checkEstVar$simulated.relative.bias
 
 ```
 Confirm that simulated relative bias is zero when rounded to the fifth digit.
 
-Under some very general conditions, when a small fraction of the population is sampled, the variance of the estimator should not be very sensitive to the number of samples seleted at the secondary sampling level. Or stated differently, the standard error should be more sensitive to the number of samples at the secondary sampling level, when a larger fraction of the population is sampled. For a fixed sampling capacity it is therefore generally better to distribute sampling effort among more PSUs, than to sample more SSUs for each PSU. Consider two sampling designs where one samples up to two SSUs pr PSU, and another samples up to for SSUs pr PSU. When the total number of SSUs sampled across all PSUs are constant we would expect the difference of the standard errors to become smaller as this total increases. We can test that the stage1HTtotal behaves as expected in this regard.
+Under some very general conditions, when a small fraction of the population is sampled, the variance of the estimator should not be very sensitive to the number of samples seleted at the secondary sampling level. Or stated differently, the standard error should be more sensitive to the number of samples at the secondary sampling level, when a larger fraction of the population is sampled. For a fixed sampling capacity it is therefore generally better in terms of reducing sampling error to distribute sampling effort among more PSUs, than to sample more SSUs for each PSU. This difference should however be smaller when a large fraction of the population is sampled. Consider two sampling designs where one samples up to two SSUs pr PSU ("2 pr PSU"), and another samples up to four SSUs pr PSU ("4 pr PSU"). When the total number of SSUs sampled across all PSUs are constant we would expect the difference of the standard errors to become smaller as this total increases. We can test that the stage1HTtotal behaves as expected in this regard.
 
 
 ```{r}
 
-stop("Bumb iterations and check for report")
 total <- totalCatch(longlinerPopulation)
 
 PSUsampleSize <- c()
@@ -225,16 +229,19 @@ se <- function(x){sqrt(diag(stage1HHvariance(x)))}
 ```{r echo=F}
 total <- totalCatch(longlinerPopulation)
 
-stop("Bumb iterations to 1000 for report")
-
 checkEstAllSampled <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 2, 72, 365)
 
-checkEstSmallSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 10, 2)
-checkEstLargeSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 50, 2)
+checkEstSmallSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 5000, 10, 2)
+checkEstLargeSample <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 5000, 50, 2)
 
-checkEstVarSmallSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstSmallSample$mean.sq.error), 50, 10, 2)
-checkEstVarLargeSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstLargeSample$mean.sq.error), 50, 50, 2)
+checkEstVarSmallSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstSmallSample$mean.sq.error), 5000, 10, 2)
+checkEstVarLargeSample <- checkEstimatorsExamplePopulation(se, sqrt(checkEstLargeSample$mean.sq.error), 5000, 50, 2)
 
+
+checkEstSmallSample$simulated.relative.bias
+checkEstLargeSample$simulated.relative.bias
+checkEstVarSmallSample$simulated.relative.bias
+checkEstVarLargeSample$simulated.relative.bias
 ```
 
 
@@ -261,12 +268,13 @@ se <- function(x){sqrt(diag(stage1HHvariance(x)))}
 ```{r echo=F}
 total <- totalCatch(longlinerPopulation)
 
-stop("Bumb iterations to 1000 for report")
-
-checkEst <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 50, 120, 2, PSU="spacetimeid")
+checkEst <- checkEstimatorsExamplePopulation(stage1HHtotal, total, 5000, 120, 2, PSU="spacetimeid")
 
 
-checkEstVar <- checkEstimatorsExamplePopulation(se, checkEst$root.mean.sq.error, 50, 120, 2, PSU="spacetimeid")
+checkEstVar <- checkEstimatorsExamplePopulation(se, checkEst$root.mean.sq.error, 5000, 120, 2, PSU="spacetimeid")
 
+
+checkEst$simulated.relative.bias
+checkEstVar$simulated.relative.bias
 
 ```
