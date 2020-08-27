@@ -263,6 +263,7 @@ ht <- horvitzThompson(samples, inclusionProbabilities)
 expect_true(abs(ht[1]-htTrue) < .005)
 cov <- horvitzThompsonCovariance(samples, inclusionProbabilities, coInclusionProbabilities)
 expect_equal(cov[1,2], cov[2,1])
+browser()
 expect_equal(cov[1,1], covMono[1,1])
 
 context("strata totals estimator")

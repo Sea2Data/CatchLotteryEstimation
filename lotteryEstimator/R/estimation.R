@@ -81,7 +81,16 @@ hansenHurwitzCovariance <- function(sampleTotals, selectionProbabilities){
 
 
   n <- length(sampleTotals)
-  return(sumSamples / (n*(n-1)))
+  sumSamples <- sumSamples / (n*(n-1))
+
+  #make matrix if vector
+  if (is.vector(sumSamples)){
+    nn <- list(names(sumSamples), names(sumSamples))
+    dim(sumSamples) <- c(1,1)
+    dimnames(sumSamples) <- nn
+  }
+
+  return(sumSamples)
 
 }
 
@@ -206,7 +215,7 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
   }
 
   # cache outer products in 4-d array
-  ops <- array(dim=c(length(sampleTotals), length(sampleTotals), length(sampleTotals), length(sampleTotals)))
+  ops <- array(dim=c(length(sampleTotals), length(sampleTotals), dim(outer(sampleTotals[[1]], sampleTotals[[1]]))))
   for (i in 1:length(sampleTotals)){
     for (j in i:length(sampleTotals)){
      ops[i,j,,] <- outer(sampleTotals[[i]], sampleTotals[[j]])
@@ -228,6 +237,13 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
         sumSamples <- sumSamples + 2*(coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * ops[i,j,,] / (coInclusionProbabilities[i,j] * inclusionProbabilities[i] * inclusionProbabilities[j])
       }
     }
+  }
+
+  #make matrix if vector
+  if (is.vector(sumSamples)){
+    nn <- list(names(sumSamples), names(sumSamples))
+    dim(sumSamples) <- c(1,1)
+    dimnames(sumSamples) <- nn
   }
 
   return(sumSamples)
