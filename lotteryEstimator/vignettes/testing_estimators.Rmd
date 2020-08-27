@@ -155,17 +155,17 @@ A more realistic example illustrates the challenge in interpreting performance s
 reducedPopulation <- sampleExamplePopulation(4,4,addSamplingProbs = F)
 ```
 
-Testing the estimator for correctness when 50000 iterations are run, selecting 3 vessels and up to 3 fishing operations from each:
+Testing the estimator for correctness when 100000 iterations are run, selecting 3 vessels and up to 3 fishing operations from each:
 
 ```{r echo=F}
 total <- totalCatch(reducedPopulation)
 
 timingEst <- system.time(
-  checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 50000, 3, 3, population = reducedPopulation)
+  checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 100000, 3, 3, population = reducedPopulation)
 )
 
 timingEstVar <- system.time(
-  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 50000, 3, 3, population = reducedPopulation)
+  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 100000, 3, 3, population = reducedPopulation)
 )
 
 timingEst
@@ -174,7 +174,7 @@ timingEstVar
 checkEstVar$simulated.relative.bias
 
 ```
-Confirm that simulated relative bias is zero when rounded to the fifth digit.
+Confirm that simulated relative bias is zero when rounded to two digits.
 
 Under some very general conditions, when a small fraction of the population is sampled, the variance of the estimator should not be very sensitive to the number of samples seleted at the secondary sampling level. Or stated differently, the standard error should be more sensitive to the number of samples at the secondary sampling level, when a larger fraction of the population is sampled. For a fixed sampling capacity it is therefore generally better in terms of reducing sampling error to distribute sampling effort among more PSUs, than to sample more SSUs for each PSU. This difference should however be smaller when a large fraction of the population is sampled. Consider two sampling designs where one samples up to two SSUs pr PSU ("2 pr PSU"), and another samples up to four SSUs pr PSU ("4 pr PSU"). When the total number of SSUs sampled across all PSUs are constant we would expect the difference of the standard errors to become smaller as this total increases. We can test that the stage1HTtotal behaves as expected in this regard.
 

@@ -205,18 +205,27 @@ horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coIn
     }
   }
 
-  sumSamples <- (1-inclusionProbabilities[1]) * outer(sampleTotals[[1]], sampleTotals[[1]]) / inclusionProbabilities[1]**2
+  # cache outer products in 4-d array
+  ops <- array(dim=c(length(sampleTotals), length(sampleTotals), length(sampleTotals), length(sampleTotals)))
+  for (i in 1:length(sampleTotals)){
+    for (j in i:length(sampleTotals)){
+     ops[i,j,,] <- outer(sampleTotals[[i]], sampleTotals[[j]])
+     ops[j,i,,] <- ops[i,j,,]
+    }
+  }
+
+  sumSamples <- (1-inclusionProbabilities[1]) * ops[1,1,,] / inclusionProbabilities[1]**2
 
   if (length(sampleTotals) > 1){
     for (i in 2:length(sampleTotals)){
-      sumSamples <- sumSamples + (1-inclusionProbabilities[i]) * outer(sampleTotals[[i]], sampleTotals[[i]]) / inclusionProbabilities[i]**2
+      sumSamples <- sumSamples + (1-inclusionProbabilities[i]) * ops[i,i,,] / inclusionProbabilities[i]**2
     }
   }
 
   for (i in 1:length(sampleTotals)){
     for (j in i:length(sampleTotals)){
       if (i != j){
-        sumSamples <- sumSamples + 2*(coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * outer(sampleTotals[[i]], sampleTotals[[j]]) / (coInclusionProbabilities[i,j] * inclusionProbabilities[i] * inclusionProbabilities[j])
+        sumSamples <- sumSamples + 2*(coInclusionProbabilities[i,j]-inclusionProbabilities[i]*inclusionProbabilities[j]) * ops[i,j,,] / (coInclusionProbabilities[i,j] * inclusionProbabilities[i] * inclusionProbabilities[j])
       }
     }
   }
