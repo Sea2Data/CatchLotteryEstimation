@@ -4,12 +4,12 @@
 \alias{poissionSample}
 \title{Possion sampling}
 \usage{
-poissionSample(population, inclusionProbabilities, sampleSize)
+poissionSample(population, selectionProbabilities, sampleSize)
 }
 \arguments{
 \item{population}{numeric: vector representing the population to sample from}
 
-\item{inclusionProbabilities}{numeric: vector representing the inclusion probabilites of the populatin}
+\item{selectionProbabilities}{numeric: vector representing the inclusion probabilites of the populatin}
 
 \item{sampleSize}{numeric: expected sample size}
 }

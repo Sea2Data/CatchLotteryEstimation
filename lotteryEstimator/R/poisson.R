@@ -65,7 +65,7 @@ poissonJointInclusionProbabilityMatrix <- function(inclusionProbabilities){
 #'  Note the definition of 'sampleSize'. In poisson sampling the sample size is not fixed and may vary from draw to draw.
 #'
 #' @param population numeric: vector representing the population to sample from
-#' @param inclusionProbabilities numeric: vector representing the inclusion probabilites of the populatin
+#' @param selectionProbabilities numeric: vector representing the inclusion probabilites of the populatin
 #' @param sampleSize numeric: expected sample size
 #' @return numeric a subset of 'population'
 #' @examples
@@ -76,41 +76,13 @@ poissonJointInclusionProbabilityMatrix <- function(inclusionProbabilities){
 #'  codselection <- codset[poissionSample(1:nrow(codset), codset$wholeWeightKg/sum(codset$wholeWeightKg), 100)]
 #'  nrow(codselection)
 #' @export
-poissionSample <- function(population, inclusionProbabilities, sampleSize){
+poissionSample <- function(population, selectionProbabilities, sampleSize){
 
-  if (any(inclusionProbabilities>1) | any(inclusionProbabilities<0)){
-    stop("Inclusion probabilites must be in [0,1]")
+  if (any(selectionProbabilities>1) | any(selectionProbabilities<0)){
+    stop("selection probabilities probabilites must be in [0,1]")
   }
 
   rn <- runif(length(population))
-  selection <- (rn <= inclusionProbabilities*sampleSize)
+  selection <- (rn <= selectionProbabilities*sampleSize)
   return(population[selection])
 }
-
-#' Random sample loss correction
-#' @description
-#'  Corrects inclusion probabilities due to random loss of samples.
-#'  Apprioriate if selected sampling units are not sampled due to random inteference.
-#'  The random interference should affect different selections with equal probability
-#'  (not related to the fact that the selections may have been made with unequal probability).
-#' @param inclusionProbability numeric: vector inclusion probabilites for sampled sampling units.
-#' @param selected The number of sampling units that was selected
-#' @param sampled The number of sampling units that was actually sampled and recorded
-#' @return numeric: vector of corrected inclusion probabilites.
-#' @examples
-#'  # correct a vector of inclusion probabilities
-#'  # 4 samples selected, two missing
-#'  randomNonResponseCorrection(c(.4,.1), 4)
-#'
-#'  # correct a single inclusion probability
-#'  # 100 samples selected. 20 missing
-#'  randomNonResponseCorrection(.1, 100, 80)
-#'
-#' @export
-randomNonResponseCorrection <- function(inclusionProbabilities, selected, sampled=length(inclusionProbabilities)){
-  lost <- selected - sampled
-  ex <- 1 - (lost / selected)
-  return(1 - (1-inclusionProbabilities)**ex)
-}
-
-
