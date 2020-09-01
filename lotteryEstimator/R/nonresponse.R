@@ -29,7 +29,7 @@
 #' @export
 randomNonResponseCorrectionFactor <- function(selectedInclusionProbabilities, sampledInclusionProbabilities){
 
-  correction <- sum(selectedInclusionProbabilities) / (sum(selectedInclusionProbabilities) + sum(sampledInclusionProbabilities))
+  correction <- sum(sampledInclusionProbabilities) / (sum(selectedInclusionProbabilities))
   return(correction)
 
 }
