@@ -288,3 +288,15 @@ ageCovarianceStrata <- function(sample){calculateSampleProportionCovariance(prop
 ageCovarianceSample <- function(sample){hierarchicalStratifiedCovariance(sample, "lengthStrata", ageCovarianceStrata)}
 ssuCov <- ageCovarianceSample(NSSH2019Stratified[NSSH2019Stratified$SSUid=="1",])
 expect_equal(ssuCov[["4","4"]],.5)
+
+context("Test integer IDs")
+numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid", numAtAgeSample, "SSUinclusionProb")}
+
+exampleSamples <- lotteryEstimator::NSSH2019
+exampleSamples$PSUid <- as.integer(exampleSamples$PSUid)+1
+exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb #only one SSU sampled pr PSU in example
+expect_error(hierarchicalHansenHurwitzTotals(exampleSamples, "PSUid", numAtAgeHaul, "PSUselectionProb"), "partitionId must be a character")
+expect_error(hierarchicalHorvitzThompsonTotals(exampleSamples, "PSUid", numAtAgeHaul, "PSUselectionProb"), "partitionId must be a character")
+
+

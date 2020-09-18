@@ -32,3 +32,10 @@ randomNonResponseCorrectionFactor <- function(selectedInclusionProbabilities, sa
   return(correction)
 
 }
+
+nrc <- function(inclusionProbabilities, selected, sampled=length(inclusionProbabilities)){
+  lost <- selected - sampled
+  ex <- 1 - (lost / selected)
+  return(1 - (1-inclusionProbabilities)**ex)
+}
+

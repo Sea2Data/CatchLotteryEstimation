@@ -453,6 +453,12 @@ hierarchicalHansenHurwitzCovariance <- function(sample, partitionId, subEstimato
 #' @return numeric() estimate of total
 #' @export
 hierarchicalHorvitzThompsonTotals <- function(sample, partitionId, subEstimator, inclusionProbabilities){
+
+  if (!is.character(sample[[partitionId]])){
+    stop("partitionId must be a character")
+  }
+
+
   sampleTotals <- list()
   iProb <- list()
 
