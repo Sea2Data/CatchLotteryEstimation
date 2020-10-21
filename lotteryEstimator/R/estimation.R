@@ -12,9 +12,6 @@ hansenHurwitz <- function(sampleTotals, selectionProbabilities){
   if (length(sampleTotals) != length(selectionProbabilities)){
     stop("selectionProbabilities does not correspond to the listed sample totals")
   }
-  if (sum(selectionProbabilities) > 1 | sum(selectionProbabilities) <= 0){
-    stop("sum of selectionProbabilities must be in [0,1>, got: ", sum(selectionProbabilities))
-  }
   if (any(selectionProbabilities > 1) | any(selectionProbabilities <= 0)){
     stop("all selectionProbabilities must be in [0,1>")
   }
@@ -50,9 +47,6 @@ hansenHurwitzCovariance <- function(sampleTotals, selectionProbabilities){
 
   if (length(sampleTotals) != length(selectionProbabilities)){
     stop("selectionProbabilities does not correspond to the listed sample totals")
-  }
-  if (sum(selectionProbabilities) > 1 | sum(selectionProbabilities) <= 0){
-    stop("sum of selectionProbabilities must be in [0,1>")
   }
   if (any(selectionProbabilities > 1) | any(selectionProbabilities <= 0)){
     stop("all selectionProbabilities must be in [0,1>")
@@ -112,9 +106,6 @@ hansenHurwitzCovariance <- function(sampleTotals, selectionProbabilities){
 hansenHurwitzIntra <- function(sampleCovariances, selectionProbabilities){
   if (length(sampleCovariances) != length(selectionProbabilities)){
     stop("selectionProbabilites does not correspond to the listed sample covariances")
-  }
-  if (sum(selectionProbabilities) > 1 | sum(selectionProbabilities) <= 0){
-    stop("sum of selectionProbabilities must be in [0,1>")
   }
   if (any(selectionProbabilities > 1) | any(selectionProbabilities <= 0)){
     stop("all selectionProbabilities must be in [0,1>")
@@ -294,19 +285,6 @@ horvitzThompsonIntra <- function(sampleCovariances, inclusionProbabilities){
 
 }
 
-#' Estimate total - REMOVE ?
-#' @description
-#'  Estimates total catch at age from estiamtes in strata.
-#' @param stratifiedCatchAtAge estimates in each strata, formatted as \code{\link[lotteryEstimator]{stratifiedCatchAtAge}}
-#' @return estimates of total catch at age, formatted as \code{\link[lotteryEstimator]{catchAtAge}}
-#' @noRd
-estimateFromStrataTotals <- function(stratifiedCatchAtAge){
-  estimate <- list()
-  estimate$catchAtAge <- Reduce('+', lapply(stratifiedCatchAtAge, FUN=function(x){x$catchAtAge}))
-  estimate$covariance <- Reduce('+', lapply(stratifiedCatchAtAge, FUN=function(x){x$covariance}))
-  return(estimate)
-}
-
 
 #
 # Hiearchical estimators
@@ -395,6 +373,83 @@ hierarchicalHansenHurwitzTotals <- function(sample, partitionId, subEstimator, s
   }
   return(hansenHurwitz(sampleTotals, unlist(sProb)))
 
+}
+
+#' Hierarchical Hansen-Hurwitz domain estimate
+#' @description
+#'  Hierarchical estimator for estimating domain totals using Hansen-Hurwitz estimators
+#' @param sample \code{\link[data.table]{data.table}} with sample data
+#' @param domainIds character() identifying the column in 'sample' that identify a partitioning of the sample into domains
+#' @param subEstimator \code{\link[lotteryEstimator]{ParameterizedEstimator}} for estimating totals for each sampled unit
+#' @param domain character() name of the domain to estimate for (must occur in the column 'domainIds')
+#' @param domainFraction numeric() the fraction of the population that fall in the domain.
+#' @examples
+#'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+#'  numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid",
+#'                                   numAtAgeSample, "SSUinclusionProb")}
+#'  exampleSamples <- lotteryEstimator::NSSH2019
+#'
+#'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+#'  numAtAgeTotal <- function(sample){hierarchicalHansenHurwitzTotals(sample, "PSUid",
+#'                                             numAtAgeHaul, "PSUselectionProb")}
+#'
+#'  #define som arbitrary domains for the sake of the example
+#'  exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid), 3, labels = c("one", "two", "three"))
+#'
+#'  #obtain domain estimate
+#'  hierarchicalHansenHurwitzDomainTotals(exampleSamples, "domains", numAtAgeTotal, "two", 1/3)
+#' @export
+hierarchicalHansenHurwitzDomainTotals <- function(sample, domainIds, subEstimator, domain, domainFraction){
+
+  if (!(domain %in% sample[[domainIds]])){
+    stop(paste("No data for domain", domain))
+  }
+
+  sample <- sample[sample[[domainIds]]==domain,]
+  domainTotal <- domainFraction*subEstimator(sample)
+
+  return(domainTotal)
+}
+
+#' Hierarchical Hansen-Hurwitz domain covariance
+#' @description
+#'  Hierarchical estimator for estimating the covariance of domain totals using Hansen-Hurwitz estimators
+#' @details
+#'  The estimator is derived from a ratio estimator and is not unbiased.
+#'  In particular, the variation in the selection of domain members is not taken into account.
+#'  The 'domainFraction' is assumed known. If this is obtained by estimation from sample,
+#'  the variance contribution from that estimate is not taken into account by this function.
+#' @param sample \code{\link[data.table]{data.table}} with sample data
+#' @param domainIds character() identifying the column in 'sample' that identify a partitioning of the sample into domains
+#' @param subCovarianceEstimator \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}} for estimating covariances for each sampled unit.
+#' @param domain character() name of the domain to estimate for (must occur in the column 'domainIds')
+#' @param domainFraction numeric() the fraction of the population that fall in the domain.
+#' @examples
+#'  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+#'  numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid",
+#'                                   numAtAgeSample, "SSUinclusionProb")}
+#'  exampleSamples <- lotteryEstimator::NSSH2019
+#'  exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+#'  hhCov <- function(samples){hierarchicalHansenHurwitzCovariance(samples, "PSUid",
+#'                                                    numAtAgeHaul, function(x){0},
+#'                                                    "PSUselectionProb")}
+#'
+#'  #define som arbitrary domains for the sake of the example
+#'  exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid), 3, labels = c("one", "two", "three"))
+#'
+#'  #obtain domain estimate
+#'  hierarchicalHansenHurwitzDomainTotalCovariance(exampleSamples, "domains", hhCov, "two", 1/3)
+#' @export
+hierarchicalHansenHurwitzDomainTotalCovariance <- function(sample, domainIds, subCovarianceEstimator, domain, domainFraction){
+
+  if (!(domain %in% sample[[domainIds]])){
+    stop(paste("No data for domain", domain))
+  }
+
+  sample <- sample[sample[[domainIds]]==domain,]
+  domainCov <- (domainFraction**2)*subCovarianceEstimator(sample)
+
+  return(domainCov)
 }
 
 #' Hierarchical Hansen-Hurwitz covariance

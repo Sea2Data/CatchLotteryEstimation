@@ -1,41 +1,30 @@
-#' Random sample loss correction
+
+#' Correct total random nonrespons
 #' @description
-#'  Calulcates factor for correcting inclusion probabilities due to random loss of samples.
-#'  Appropriate if selected sampling units are not sampled due to random inteference.
-#'  The random interference should affect different selections with equal probability
-#'  (not related to the fact that the selections may have been made with unequal probability).
-#' @param selectedInclusionProbabilities numeric: vector with inclusion probabilites for selected sampling units.
-#' @param sampledInclusionProbabilities numeric: vector with inclusion probabilites for sampled sampling units ('selectedInclusionProbabilities' excluding non-response).
-#' @return scalar for correcting inclusionprobabilites
+#'  Horvitz-Thompson estimate of a total for random non-response, assuming known response rate
+#' @param respTotal Estimate of total based on respondents
+#' @param responseRate the response rate.
+#' @return Estimate of the total, corrected for random nonresponse
 #' @examples
-#'  # correct a vector of inclusion probabilities
-#'  # 4 samples selected, two missing
-#'  inclusionProbabilities <- c(.4,.1,.2,.1)
-#'  nonresponse <- c(F,F,T,T)
-#'  sampled <- inclusionProbabilities[!nonresponse]
-#'  correctionFactor <- randomNonResponseCorrectionFactor(inclusionProbabilities, sampled)
-#'  correctedInclusionProbabilites <- sampled * correctionFactor
-#'
-#'  sampleTotals <- c(3,4)
-#'
-#'  #estimate
-#'  preEst <- horvitzThompson(sampleTotals, correctedInclusionProbabilites)
-#'
-#'  #correct post-estimate
-#'  postEst <- horvitzThompson(sampleTotals, inclusionProbabilities[!nonresponse])/correctionFactor
-#'
-#'  preEst - postEst
-#'
+#'  #survey with an estimated total of 55, 10 respondents and a responserate of .7
+#'  randomNonResponseCorrectionTotal(55, 10, .7)
 #' @export
-randomNonResponseCorrectionFactor <- function(selectedInclusionProbabilities, sampledInclusionProbabilities){
-  correction <- sum(1/sampledInclusionProbabilities) / (sum(1/selectedInclusionProbabilities))
-  return(correction)
-
+randomNonResponseCorrectionTotal <- function(respTotal, responseRate){
+  nonrespTot <- respTotal * (1-responseRate) / responseRate
+  return(respTotal+nonrespTot)
 }
 
-nrc <- function(inclusionProbabilities, selected, sampled=length(inclusionProbabilities)){
-  lost <- selected - sampled
-  ex <- 1 - (lost / selected)
-  return(1 - (1-inclusionProbabilities)**ex)
-}
+#' Correct total random nonrespons
+#' @description
+#'  Horvitz-Thompson estimate of a standard error for random non-response, assuming known response rate.
+#' @param respSE Estimate of standard error of total based on respondents
+#' @param responseRate the response rate.
+#' @return Estimate of the standard error of the total, corrected for random nonresponse
+#' @examples
+#'  #survey with an estimated SE of 30, 10 respondents and a responserate of .7
+#'  randomNonResponseCorrectionSE(30, 10, .7)
+#' @export
+randomNonResponseCorrectionSE <- function(respSE, responseRate){
 
+  return(respSE + respSE*((1-responseRate) / responseRate))
+}
