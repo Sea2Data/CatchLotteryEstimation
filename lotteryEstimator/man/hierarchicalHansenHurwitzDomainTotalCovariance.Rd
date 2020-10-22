@@ -29,6 +29,7 @@ Hierarchical estimator for estimating the covariance of domain totals using Hans
 \details{
 The estimator is derived from a ratio estimator and is not unbiased.
 In particular, the variation in the selection of domain members is not taken into account.
+The bias is low if the number of sampled units in the domain is correlated with the sample totals for the domain.
 The 'domainFraction' is assumed known. If this is obtained by estimation from sample,
 the variance contribution from that estimate is not taken into account by this function.
 }

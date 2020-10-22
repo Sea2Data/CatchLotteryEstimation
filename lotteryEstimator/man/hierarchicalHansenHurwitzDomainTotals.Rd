@@ -24,7 +24,9 @@ hierarchicalHansenHurwitzDomainTotals(
 \item{domainFraction}{numeric() the fraction of the population that fall in the domain.}
 }
 \description{
-Hierarchical estimator for estimating domain totals using Hansen-Hurwitz estimators
+Hierarchical estimator for estimating domain totals using Hansen-Hurwitz estimators.
+The estimator is derived from a ratio estimator and is not unbiased.
+The bias is low if the number of sampled units in the domain is correlated with the sample totals for the domain.
 }
 \examples{
  numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}

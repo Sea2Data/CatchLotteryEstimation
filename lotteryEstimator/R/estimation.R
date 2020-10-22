@@ -377,7 +377,9 @@ hierarchicalHansenHurwitzTotals <- function(sample, partitionId, subEstimator, s
 
 #' Hierarchical Hansen-Hurwitz domain estimate
 #' @description
-#'  Hierarchical estimator for estimating domain totals using Hansen-Hurwitz estimators
+#'  Hierarchical estimator for estimating domain totals using Hansen-Hurwitz estimators.
+#'  The estimator is derived from a ratio estimator and is not unbiased.
+#'  The bias is low if the number of sampled units in the domain is correlated with the sample totals for the domain.
 #' @param sample \code{\link[data.table]{data.table}} with sample data
 #' @param domainIds character() identifying the column in 'sample' that identify a partitioning of the sample into domains
 #' @param subEstimator \code{\link[lotteryEstimator]{ParameterizedEstimator}} for estimating totals for each sampled unit
@@ -417,6 +419,7 @@ hierarchicalHansenHurwitzDomainTotals <- function(sample, domainIds, subEstimato
 #' @details
 #'  The estimator is derived from a ratio estimator and is not unbiased.
 #'  In particular, the variation in the selection of domain members is not taken into account.
+#'  The bias is low if the number of sampled units in the domain is correlated with the sample totals for the domain.
 #'  The 'domainFraction' is assumed known. If this is obtained by estimation from sample,
 #'  the variance contribution from that estimate is not taken into account by this function.
 #' @param sample \code{\link[data.table]{data.table}} with sample data
