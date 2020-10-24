@@ -155,17 +155,17 @@ A more realistic example illustrates the challenge in interpreting performance s
 reducedPopulation <- sampleExamplePopulation(4,4,addSamplingProbs = F)
 ```
 
-Testing the estimator for correctness when 100000 iterations are run, selecting 3 vessels and up to 3 fishing operations from each:
+Testing the estimator for correctness when $5000$ iterations are run, selecting $3$ vessels and up to $3$ fishing operations from each:
 
 ```{r echo=F}
 total <- totalCatch(reducedPopulation)
 
 timingEst <- system.time(
-  checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 100000, 3, 3, population = reducedPopulation)
+  checkEst <- checkEstimatorsExamplePopulation(stage1HTtotal, total, 5000, 3, 3, population = reducedPopulation)
 )
 
 timingEstVar <- system.time(
-  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 100000, 3, 3, population = reducedPopulation)
+  checkEstVar <- checkEstimatorsExamplePopulation(stage1HTse, checkEst$root.mean.sq.error, 5000, 3, 3, population = reducedPopulation)
 )
 
 timingEst
