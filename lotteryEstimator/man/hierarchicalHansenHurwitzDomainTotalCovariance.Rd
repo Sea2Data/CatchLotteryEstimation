@@ -24,7 +24,7 @@ hierarchicalHansenHurwitzDomainTotalCovariance(
 \item{domainFraction}{numeric() the fraction of the population that fall in the domain.}
 }
 \description{
-Hierarchical estimator for estimating the covariance of domain totals using Hansen-Hurwitz estimators
+\code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating the covariance of domain totals using Hansen-Hurwitz estimators
 }
 \details{
 The estimator is derived from a ratio estimator and is not unbiased.

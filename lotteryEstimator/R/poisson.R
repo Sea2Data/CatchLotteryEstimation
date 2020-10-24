@@ -45,7 +45,7 @@ poissonSelectionProbability <- function(inclusionProbability, sampleSize){
   return(1-(1-inclusionProbability)**(1/sampleSize))
 }
 
-#' Poission joint inclusion probability
+#' Poisson joint inclusion probability
 #' @description calculates the pariwise joint inclusion probability for Poisson sampling, based on respective inclusion probabilities
 #' @param inclusionProbabilities inclusion probabilities for a sample
 #' @return the pairwise joint inclusion probability matrix
@@ -73,10 +73,10 @@ poissonJointInclusionProbabilityMatrix <- function(inclusionProbabilities){
 #'  codset <- longlinerPopulation[longlinerPopulation$speciesFAO == "COD",]
 #'
 #'  #select cod catches with inclusion probabilites proportional to their weight
-#'  codselection <- codset[poissionSample(1:nrow(codset), codset$wholeWeightKg/sum(codset$wholeWeightKg), 100)]
+#'  codselection <- codset[poissonSample(1:nrow(codset), codset$wholeWeightKg/sum(codset$wholeWeightKg), 100)]
 #'  nrow(codselection)
 #' @export
-poissionSample <- function(population, selectionProbabilities, sampleSize){
+poissonSample <- function(population, selectionProbabilities, sampleSize){
 
   if (any(selectionProbabilities>1) | any(selectionProbabilities<0)){
     stop("selection probabilities probabilites must be in [0,1]")

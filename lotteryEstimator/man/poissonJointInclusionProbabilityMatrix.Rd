@@ -2,7 +2,7 @@
 % Please edit documentation in R/poisson.R
 \name{poissonJointInclusionProbabilityMatrix}
 \alias{poissonJointInclusionProbabilityMatrix}
-\title{Poission joint inclusion probability}
+\title{Poisson joint inclusion probability}
 \usage{
 poissonJointInclusionProbabilityMatrix(inclusionProbabilities)
 }

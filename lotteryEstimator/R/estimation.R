@@ -178,7 +178,10 @@ horvitzThompson <- function(sampleTotals, inclusionProbabilities){
 #' @export
 horvitzThompsonCovariance <- function(sampleTotals, inclusionProbabilities, coInclusionProbabilities){
   if (length(sampleTotals) != length(inclusionProbabilities)){
-    stop("inclusionProbabilities does not correspond to the listed sample covariances")
+    stop(paste("inclusionProbabilities does not correspond to the listed sample covariances", length(sampleTotals), "vs", length(inclusionProbabilities)))
+  }
+  if (nrow(coInclusionProbabilities) != length(inclusionProbabilities)){
+    stop(paste("inclusionProbabilities does not correspond to the listed coInclusionProbabilities", length(inclusionProbabilities), "vs", nrow(coInclusionProbabilities), "x", ncol(coInclusionProbabilities)))
   }
   if (any(inclusionProbabilities > 1) | any(inclusionProbabilities <= 0)){
     stop("all inclusionProbabilities must be in [0,1>")
@@ -377,7 +380,7 @@ hierarchicalHansenHurwitzTotals <- function(sample, partitionId, subEstimator, s
 
 #' Hierarchical Hansen-Hurwitz domain estimate
 #' @description
-#'  Hierarchical estimator for estimating domain totals using Hansen-Hurwitz estimators.
+#'  \code{\link[lotteryEstimator]{HierarchicalEstimator}} for estimating domain totals using Hansen-Hurwitz estimators.
 #'  The estimator is derived from a ratio estimator and is not unbiased.
 #'  The bias is low if the number of sampled units in the domain is correlated with the sample totals for the domain.
 #' @param sample \code{\link[data.table]{data.table}} with sample data
@@ -415,7 +418,7 @@ hierarchicalHansenHurwitzDomainTotals <- function(sample, domainIds, subEstimato
 
 #' Hierarchical Hansen-Hurwitz domain covariance
 #' @description
-#'  Hierarchical estimator for estimating the covariance of domain totals using Hansen-Hurwitz estimators
+#'  \code{\link[lotteryEstimator]{HierarchicalCovarianceEstimator}} for estimating the covariance of domain totals using Hansen-Hurwitz estimators
 #' @details
 #'  The estimator is derived from a ratio estimator and is not unbiased.
 #'  In particular, the variation in the selection of domain members is not taken into account.
@@ -496,6 +499,28 @@ hierarchicalHansenHurwitzCovariance <- function(sample, partitionId, subEstimato
 
   return(cov)
 
+}
+
+#' Hierarchical Horvitz-Thompson domain estimate
+#' @description
+#'  \code{\link[lotteryEstimator]{HierarchicalEstimator}} for estimating domain totals using Horvitz-Thompson estimators.
+#' @details
+#'  Note that no corresponding function for Horvitz-Thompson domain variance estimation is defined.
+#' @param sample \code{\link[data.table]{data.table}} with sample data
+#' @param domainIds character() identifying the column in 'sample' that identify a partitioning of the sample into domains
+#' @param subEstimator \code{\link[lotteryEstimator]{ParameterizedEstimator}} for estimating totals for each sampled unit
+#' @param domain character() name of the domain to estimate for (must occur in the column 'domainIds')
+#' @export
+hierarchicalHorvitzThompsonDomainTotals <- function(sample, domainIds, subEstimator, domain){
+
+  if (!(domain %in% sample[[domainIds]])){
+    stop(paste("No data for domain", domain))
+  }
+
+  sample <- sample[sample[[domainIds]]==domain,]
+  domainTotal <- subEstimator(sample)
+
+  return(domainTotal)
 }
 
 #' Hierarchical Horvitz Thompson
@@ -668,21 +693,5 @@ NULL
 #'  }
 #'
 #' @name catchAtAge
-#'
-NULL
-
-#' Stratified catch at age - REMOVE ?
-#'
-#' Stratified Estimate of catch at age in numbers
-#'
-#' @details
-#'  list with three members:
-#'  \describe{
-#'     \item{estimates}{named list of \code{\link[lotteryEstimator]{catchAtAge}} estimates, with names identifying strata the estimate was done for.}
-#'  }
-#'
-#'
-#' @name stratifiedCatchAtAge
-#' @noRd
 #'
 NULL

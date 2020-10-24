@@ -316,3 +316,18 @@ exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid), 3, labels = c("o
 cov <- hierarchicalHansenHurwitzDomainTotalCovariance(exampleSamples, "domains", hhCov, "two", 1/3)
 expect_equal(ncol(cov), 19)
 expect_equal(nrow(cov), 19)
+
+
+
+context("Test domain estimation HT")
+numAtAgeSample <- function(sample){countCategorical(sample$age, 2:20)}
+numAtAgeHaul <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "SSUid",
+                                                                   numAtAgeSample, "SSUinclusionProb")}
+exampleSamples <- lotteryEstimator::NSSH2019
+exampleSamples$SSUinclusionProb <- exampleSamples$SSUselectionProb * exampleSamples$nSSU
+numAtAgeTotal <- function(sample){hierarchicalHorvitzThompsonTotals(sample, "PSUid",
+                                                                  numAtAgeHaul, "PSUinclusionProb")}
+exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid), 3, labels = c("one", "two", "three"))
+de1 <- hierarchicalHansenHurwitzDomainTotals(exampleSamples, "domains", numAtAgeTotal, "one", 1/3)
+expect_equal(length(de1), 19)
+
