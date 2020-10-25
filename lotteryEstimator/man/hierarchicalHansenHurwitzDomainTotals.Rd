@@ -39,8 +39,13 @@ The bias is low if the number of sampled units in the domain is correlated with 
                                             numAtAgeHaul, "PSUselectionProb")}
 
  #define som arbitrary domains for the sake of the example
- exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid), 3, labels = c("one", "two", "three"))
+ exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid),
+                               3, labels = c("one", "two", "three"))
 
  #obtain domain estimate
- hierarchicalHansenHurwitzDomainTotals(exampleSamples, "domains", numAtAgeTotal, "two", 1/3)
+ hierarchicalHansenHurwitzDomainTotals(exampleSamples,
+                                       "domains",
+                                       numAtAgeTotal,
+                                       "two",
+                                       1/3)
 }

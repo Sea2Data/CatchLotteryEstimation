@@ -29,6 +29,8 @@ Note the definition of 'sampleSize'. In poisson sampling the sample size is not 
  codset <- longlinerPopulation[longlinerPopulation$speciesFAO == "COD",]
 
  #select cod catches with inclusion probabilites proportional to their weight
- codselection <- codset[poissonSample(1:nrow(codset), codset$wholeWeightKg/sum(codset$wholeWeightKg), 100)]
+ codselection <- codset[poissonSample(1:nrow(codset),
+                        codset$wholeWeightKg/sum(codset$wholeWeightKg),
+                        100)]
  nrow(codselection)
 }

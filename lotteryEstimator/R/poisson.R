@@ -73,7 +73,9 @@ poissonJointInclusionProbabilityMatrix <- function(inclusionProbabilities){
 #'  codset <- longlinerPopulation[longlinerPopulation$speciesFAO == "COD",]
 #'
 #'  #select cod catches with inclusion probabilites proportional to their weight
-#'  codselection <- codset[poissonSample(1:nrow(codset), codset$wholeWeightKg/sum(codset$wholeWeightKg), 100)]
+#'  codselection <- codset[poissonSample(1:nrow(codset),
+#'                         codset$wholeWeightKg/sum(codset$wholeWeightKg),
+#'                         100)]
 #'  nrow(codselection)
 #' @export
 poissonSample <- function(population, selectionProbabilities, sampleSize){
@@ -82,7 +84,7 @@ poissonSample <- function(population, selectionProbabilities, sampleSize){
     stop("selection probabilities probabilites must be in [0,1]")
   }
 
-  rn <- runif(length(population))
+  rn <- stats::runif(length(population))
   selection <- (rn <= selectionProbabilities*sampleSize)
   return(population[selection])
 }

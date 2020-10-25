@@ -60,9 +60,9 @@ The analysis is restricted to 2-stage sampling using \code{\link[lotteryEstimato
      sum(longlinerPopulation$speciesFAO=="COD")}
 
  #evaluate naive estimator
- \dontrun{checkEstimatorslonglinerPopulation(est, total, 1000, 20, 1)}
+ \dontrun{checkEstimatorsExamplePopulation(est, total, 1000, 20, 1)}
 
  #confirm that naive estimator is correct when entire population is sampled
- checkEstimatorslonglinerPopulation(est, total, 2, 72, 365)
+ checkEstimatorsExamplePopulation(est, total, 2, 72, 365)
 
 }

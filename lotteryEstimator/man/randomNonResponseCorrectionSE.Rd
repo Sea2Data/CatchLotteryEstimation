@@ -18,6 +18,6 @@ Estimate of the standard error of the total, corrected for random nonresponse
 Horvitz-Thompson estimate of a standard error for random non-response, assuming known response rate.
 }
 \examples{
- #survey with an estimated SE of 30, 10 respondents and a responserate of .7
- randomNonResponseCorrectionSE(30, 10, .7)
+ #survey with an estimated SE of 30, and a responserate of .7
+ randomNonResponseCorrectionSE(30, .7)
 }

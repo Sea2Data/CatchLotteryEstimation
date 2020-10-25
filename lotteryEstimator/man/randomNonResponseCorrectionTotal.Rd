@@ -18,6 +18,6 @@ Estimate of the total, corrected for random nonresponse
 Horvitz-Thompson estimate of a total for random non-response, assuming known response rate
 }
 \examples{
- #survey with an estimated total of 55, 10 respondents and a responserate of .7
- randomNonResponseCorrectionTotal(55, 10, .7)
+ #survey with an estimated total of 55, and a responserate of .7
+ randomNonResponseCorrectionTotal(55, .7)
 }

@@ -44,8 +44,13 @@ the variance contribution from that estimate is not taken into account by this f
                                                    "PSUselectionProb")}
 
  #define som arbitrary domains for the sake of the example
- exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid), 3, labels = c("one", "two", "three"))
+ exampleSamples$domains <- cut(as.numeric(exampleSamples$PSUid),
+                               3, labels = c("one", "two", "three"))
 
  #obtain domain estimate
- hierarchicalHansenHurwitzDomainTotalCovariance(exampleSamples, "domains", hhCov, "two", 1/3)
+ hierarchicalHansenHurwitzDomainTotalCovariance(exampleSamples,
+                                                "domains",
+                                                hhCov,
+                                                "two",
+                                                1/3)
 }

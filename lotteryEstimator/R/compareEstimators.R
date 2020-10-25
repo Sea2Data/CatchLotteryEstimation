@@ -34,7 +34,7 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::lon
   }
 
   #annotate total PSUs and SSUs
-  ssuTotal <- population[,.(Nssu=length(unique(get(SSU)))), by=PSU]
+  ssuTotal <- population[,list(Nssu=length(unique(get(SSU)))), by=PSU]
 
   population <- merge(population, ssuTotal)
   population$Npsu <- length(unique(population[[PSU]]))
@@ -94,10 +94,10 @@ sampleExamplePopulation <- function(nPSU, nSSU, population=lotteryEstimator::lon
 #'      sum(longlinerPopulation$speciesFAO=="COD")}
 #'
 #'  #evaluate naive estimator
-#'  \dontrun{checkEstimatorslonglinerPopulation(est, total, 1000, 20, 1)}
+#'  \dontrun{checkEstimatorsExamplePopulation(est, total, 1000, 20, 1)}
 #'
 #'  #confirm that naive estimator is correct when entire population is sampled
-#'  checkEstimatorslonglinerPopulation(est, total, 2, 72, 365)
+#'  checkEstimatorsExamplePopulation(est, total, 2, 72, 365)
 #'
 #' @export
 checkEstimatorsExamplePopulation <- function(estimator, popParameter, iterations, nPSU, nSSU, population=lotteryEstimator::longlinerPopulation, PSU="vesselId", SSU="opid"){
