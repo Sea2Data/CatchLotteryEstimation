@@ -235,3 +235,19 @@ makeLengthStratifiedSubsample <- function(sample, lengthStrata=defaultLengthStra
   return(resample)
 
 }
+
+
+#' Catch at age
+#'
+#' Estimate of catch at age in numbers
+#'
+#' @details
+#'  list with two memebers:
+#'  \describe{
+#'   \item{catchAtAge}{numeric() named vector with catch at age in numbers for each age group}
+#'   \item{covariance}{matrix() with covariance of catch at age between age groups}
+#'  }
+#'
+#' @name catchAtAge
+#'
+NULL

@@ -655,12 +655,16 @@ NULL
 #' Hierarchical estimator
 #'
 #' Function contract for hierarchical estimators.
+#'
+#' The contract specifies what the first argument and the return value.
+#' Fix other arguments in order to form a \code{\link[lotteryEstimator]{ParameterizedEstimator}}
+#'
 #' Hierarchical estimators are estimators that depend on other estimates being made for partitions of the sample.
 #' Such partitions can be lower level sampling units, clusters or strata.
 #' A hierachical estimator will divide the sample into subsets with data for each partition
 #' and call another function to calculate estimates from each of these subsets.
 #'
-#' These functions take three arguments:
+#' These functions take one or more arguments:
 #' \describe{
 #'  \item{sample}{\code{\link{data.table}{data.table}} with the sample to estimate from}
 #'  \item{...}{other arguments needed to calculate estimate}
@@ -675,11 +679,15 @@ NULL
 #' Hierarchical covariance estimator
 #'
 #' Function contract for hierarchical covariance estimators.
+#'
+#' The contract specifies what the first argument and the return value.
+#' Fix other arguments in order to form a \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}}
+#'
 #' Hierarchical covariance estimators are estimators that depend on other estimates being made for partitions of the sample.
 #' A hierachical covariance estimator will divide the sample into subsets with data for each partition
 #' and call another function to calculate estimates from each of these subsets.
 #'
-#' These functions take three arguments:
+#' These functions one or more arguments:
 #' \describe{
 #'  \item{sample}{\code{\link{data.table}{data.table}} with the sample to estimate from}
 #'  \item{...}{other arguments needed to calculate covariance estimates}
@@ -688,20 +696,5 @@ NULL
 #' A Hierarchical covariance estimator return a covariance matrix with covariances between estimated parameters
 #'
 #' @name HierarchicalCovarianceEstimator
-#'
-NULL
-
-#' Catch at age
-#'
-#' Estimate of catch at age in numbers
-#'
-#' @details
-#'  list with two memebers:
-#'  \describe{
-#'   \item{catchAtAge}{numeric() named vector with catch at age in numbers for each age group}
-#'   \item{covariance}{matrix() with covariance of catch at age between age groups}
-#'  }
-#'
-#' @name catchAtAge
 #'
 NULL

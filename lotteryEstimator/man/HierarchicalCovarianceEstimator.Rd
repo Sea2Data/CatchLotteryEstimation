@@ -5,12 +5,16 @@
 \title{Hierarchical covariance estimator}
 \description{
 Function contract for hierarchical covariance estimators.
+}
+\details{
+The contract specifies what the first argument and the return value.
+Fix other arguments in order to form a \code{\link[lotteryEstimator]{ParameterizedCovarianceEstimator}}
+
 Hierarchical covariance estimators are estimators that depend on other estimates being made for partitions of the sample.
 A hierachical covariance estimator will divide the sample into subsets with data for each partition
 and call another function to calculate estimates from each of these subsets.
-}
-\details{
-These functions take three arguments:
+
+These functions one or more arguments:
 \describe{
 \item{sample}{\code{\link{data.table}{data.table}} with the sample to estimate from}
 \item{...}{other arguments needed to calculate covariance estimates}
